@@ -1,3 +1,4 @@
+
 'use client';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/products';
@@ -7,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import ProductDetailsClient from '@/components/product-details-client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Instagram } from 'lucide-react';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
@@ -139,9 +140,20 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         </div>
       </main>
       <footer className="bg-card border-t mt-auto">
-          <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-              <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
+        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
+          <div className="flex justify-center mt-4">
+            <Link
+              href="https://www.instagram.com/darpan_wears?igsh=a2pkYXhpajVwNnR3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary"
+            >
+              <Instagram className="h-6 w-6" />
+              <span className="sr-only">Instagram</span>
+            </Link>
           </div>
+        </div>
       </footer>
     </div>
   );

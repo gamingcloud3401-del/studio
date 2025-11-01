@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -8,7 +9,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/products';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Instagram } from 'lucide-react';
 
 export default function Home() {
   const firestore = useFirestore();
@@ -93,9 +94,20 @@ export default function Home() {
         </section>
       </main>
       <footer className="bg-card border-t mt-auto">
-          <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-              <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
+        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
+          <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
+          <div className="flex justify-center mt-4">
+            <Link
+              href="https://www.instagram.com/darpan_wears?igsh=a2pkYXhpajVwNnR3"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary"
+            >
+              <Instagram className="h-6 w-6" />
+              <span className="sr-only">Instagram</span>
+            </Link>
           </div>
+        </div>
       </footer>
     </div>
   );
