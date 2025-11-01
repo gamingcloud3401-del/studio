@@ -1,3 +1,4 @@
+
 export type Product = {
   id: string;
   name: string;
@@ -11,6 +12,7 @@ export type Product = {
       hint: string;
   }[];
   sizes: string[];
+  productLink?: string;
 };
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {

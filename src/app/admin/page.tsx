@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -17,7 +18,7 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const productSchema = z.object({
@@ -26,9 +27,75 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   imageUrl: z.string().url('Please enter a valid image URL'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
+  productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
+
+function ProductSearch() {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [foundProduct, setFoundProduct] = useState<Product | null>(null);
+    const [searched, setSearched] = useState(false);
+
+    const firestore = useFirestore();
+    const productsCollection = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'products');
+    }, [firestore]);
+
+    const { data: products, isLoading } = useCollection<Product>(productsCollection);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        setSearched(true);
+        if (!products || !searchTerm) {
+            setFoundProduct(null);
+            return;
+        }
+        const result = products.find(p => p.id === searchTerm.trim());
+        setFoundProduct(result || null);
+    };
+
+    return (
+        <div className="space-y-4">
+             <h2 className="text-2xl font-bold font-headline">Find Product by ID</h2>
+            <form onSubmit={handleSearch} className="flex gap-2">
+                <Input
+                    type="text"
+                    placeholder="Enter Product ID..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="flex-grow"
+                />
+                <Button type="submit" disabled={isLoading}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Search
+                </Button>
+            </form>
+            {searched && (
+                <div className="pt-4">
+                    {foundProduct ? (
+                         <Card>
+                            <CardContent className="p-4">
+                               <p className="font-bold">{foundProduct.name}</p>
+                               <p className="text-sm text-muted-foreground">ID: {foundProduct.id}</p>
+                               {foundProduct.productLink ? (
+                                   <a href={foundProduct.productLink} target="_blank" rel="noopener noreferrer" className="text-primary underline mt-2 inline-block">
+                                        {foundProduct.productLink}
+                                   </a>
+                               ) : (
+                                  <p className="text-sm text-muted-foreground mt-2">No product link available.</p>
+                               )}
+                            </CardContent>
+                         </Card>
+                    ) : (
+                        <p className="text-muted-foreground text-center">Product not found.</p>
+                    )}
+                </div>
+            )}
+        </div>
+    )
+}
 
 function ProductList() {
     const firestore = useFirestore();
@@ -124,6 +191,7 @@ export default function AdminPage() {
       price: 0,
       imageUrl: '',
       sizes: '',
+      productLink: '',
     },
   });
 
@@ -141,13 +209,11 @@ export default function AdminPage() {
     
     try {
         const productsCollectionRef = collection(firestore, 'products');
-        // Let firestore generate the ID
         const newDocRef = doc(productsCollectionRef); 
         const productId = newDocRef.id;
 
-
         const newProduct = {
-            id: productId, // assign the generated id
+            id: productId,
             name: data.name,
             description: data.description,
             price: data.price,
@@ -161,9 +227,9 @@ export default function AdminPage() {
                 },
             ],
             sizes: data.sizes.split(',').map(s => s.trim()),
+            productLink: data.productLink || '',
         };
 
-      // Pass the ref with the ID to setDoc
       await addDocumentNonBlocking(productsCollectionRef, newProduct);
       
       toast({
@@ -268,11 +334,30 @@ export default function AdminPage() {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="productLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Link (Admin only)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/product-link" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? 'Adding Product...' : 'Add Product'}
               </Button>
             </form>
           </Form>
+        </div>
+
+        <Separator className="my-12" />
+
+        <div className="max-w-2xl mx-auto">
+            <ProductSearch />
         </div>
 
         <Separator className="my-12" />

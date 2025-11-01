@@ -25,6 +25,7 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, 'Price must be a positive number'),
   imageUrl: z.string().url('Please enter a valid image URL'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
+  productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -56,6 +57,7 @@ export default function EditProductPage() {
         price: product.price,
         imageUrl: product.images[0]?.url || '',
         sizes: product.sizes.join(', '),
+        productLink: product.productLink || '',
       });
     }
   }, [product, form]);
@@ -89,6 +91,7 @@ export default function EditProductPage() {
                 },
             ],
             sizes: data.sizes.split(',').map(s => s.trim()),
+            productLink: data.productLink || '',
         };
 
       await setDoc(docRef, updatedProduct, { merge: true });
@@ -129,6 +132,7 @@ export default function EditProductPage() {
                     <div className="space-y-6">
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-20 w-full" /></div>
+                        <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
@@ -246,6 +250,19 @@ export default function EditProductPage() {
                     <FormLabel>Sizes (comma-separated)</FormLabel>
                     <FormControl>
                       <Input placeholder="e.g., S, M, L, XL" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="productLink"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Link (Admin only)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/product-link" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
