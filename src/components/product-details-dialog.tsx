@@ -24,8 +24,8 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl w-full h-auto max-h-[90vh] grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
-        <div className="flex justify-center items-start overflow-hidden rounded-t-lg md:rounded-l-lg md:rounded-t-none">
+      <DialogContent className="max-w-4xl w-full max-h-[90vh] flex flex-col md:flex-row p-0">
+        <div className="w-full md:w-1/2 flex-shrink-0">
              <Carousel className="w-full h-full">
                 <CarouselContent>
                     {product.images.map((image) => (
@@ -35,7 +35,7 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
                                 src={image.url}
                                 alt={image.alt}
                                 fill
-                                className="object-cover"
+                                className="object-cover md:rounded-l-lg"
                                 data-ai-hint={image.hint}
                                 priority={product.images.indexOf(image) === 0}
                             />
@@ -51,7 +51,7 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
                 )}
             </Carousel>
         </div>
-        <div className="flex flex-col p-6 sm:p-8 overflow-y-auto">
+        <div className="flex flex-col p-6 sm:p-8 overflow-y-auto flex-grow">
             <h1 className="text-3xl lg:text-4xl font-bold font-headline text-foreground mb-3">{product.name}</h1>
             <p className="text-2xl font-bold text-primary mb-4">{product.priceFormatted}</p>
             <Separator className="my-4" />
