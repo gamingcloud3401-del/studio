@@ -17,7 +17,7 @@ import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import type { Product } from '@/lib/products';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Instagram, PlusCircle, Trash2 } from 'lucide-react';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
@@ -172,10 +172,21 @@ export default function EditProductPage() {
       <header className="bg-card border-b sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center gap-2 text-3xl font-bold text-primary font-headline">
-                <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
-                <span>Darpan Wears - Admin</span>
-            </Link>
+            <div className="flex items-center gap-4">
+                <Link href="/" className="flex items-center gap-2 text-3xl font-bold text-primary font-headline">
+                    <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
+                    <span>Darpan Wears - Admin</span>
+                </Link>
+                <Link
+                    href="https://www.instagram.com/darpan_wears?igsh=a2pkYXhpajVwNnR3"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-primary"
+                    >
+                    <Instagram className="h-6 w-6" />
+                    <span className="sr-only">Instagram</span>
+                </Link>
+            </div>
             <Button asChild>
                 <Link href="/">View Shop</Link>
             </Button>
@@ -311,3 +322,5 @@ export default function EditProductPage() {
     </div>
   );
 }
+
+    
