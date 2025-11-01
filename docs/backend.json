@@ -111,6 +111,25 @@
         "customerAddress",
         "isCompleted"
       ]
+    },
+    "SiteSetting": {
+      "title": "Site Setting",
+      "type": "object",
+      "description": "Represents a global application setting, like footer text.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for the setting (e.g., 'footer')."
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the setting."
+        }
+      },
+      "required": [
+        "id",
+        "content"
+      ]
     }
   },
   "auth": {
@@ -165,6 +184,22 @@
             {
               "name": "orderId",
               "description": "Unique identifier for the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/settings/{settingId}",
+        "definition": {
+          "entityName": "SiteSetting",
+          "schema": {
+            "$ref": "#/backend/entities/SiteSetting"
+          },
+          "description": "Stores global site settings. For example, the document with ID 'footer' holds the custom footer text.",
+          "params": [
+            {
+              "name": "settingId",
+              "description": "Unique identifier for the setting (e.g., 'footer')."
             }
           ]
         }

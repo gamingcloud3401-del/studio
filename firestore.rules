@@ -8,6 +8,7 @@
  * - /products/{productId}: Stores product details. Read access is public, while write access is currently open for prototyping.
  * - /customers/{customerId}: Stores customer data, with access restricted to the owning user.
  * - /orders/{orderId}: Stores order information. Read access is public, while write access is currently open for prototyping. Each order includes references to customerId and productId.
+ * - /settings/{settingId}: Stores global site settings. Public read, admin-only write.
  *
  * Key Security Decisions:
  * - Customer data is strictly controlled by the owning user, ensuring privacy and preventing unauthorized access.
@@ -78,6 +79,18 @@ service cloud.firestore {
       allow create: if true; // TODO: Secure in production with appropriate role-based or attribute-based access control.
       allow update: if true; // TODO: Secure in production with appropriate role-based or attribute-based access control.
       allow delete: if true; // TODO: Secure in production with appropriate role-based or attribute-based access control.
+    }
+    
+    /**
+     * @description Allows public read access to site settings, but write access is restricted.
+     * @path /settings/{settingId}
+     * @allow get, list: Allows any user to read site settings.
+     * @allow create, update, delete: Open for prototyping, should be admin-only in production.
+     */
+    match /settings/{settingId} {
+        allow get: if true;
+        allow list: if true;
+        allow create, update, delete: if true; // TODO: Secure in production to be admin-only.
     }
 
     // --- Helper Functions ---

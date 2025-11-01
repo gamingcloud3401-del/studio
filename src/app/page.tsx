@@ -5,11 +5,30 @@ import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductDetailsDialog } from '@/components/product-details-dialog';
 import Link from 'next/link';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/products';
-import { collection } from 'firebase/firestore';
+import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Instagram } from 'lucide-react';
+import type { SiteSetting } from '@/lib/settings';
+
+function SiteFooter() {
+  const firestore = useFirestore();
+  const footerDocRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'settings', 'footer');
+  }, [firestore]);
+
+  const { data: footerData } = useDoc<SiteSetting>(footerDocRef);
+
+  return (
+    <footer className="bg-card border-t mt-auto">
+      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
+        <p>{footerData?.content || `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.`}</p>
+      </div>
+    </footer>
+  );
+}
 
 export default function Home() {
   const firestore = useFirestore();
@@ -104,11 +123,7 @@ export default function Home() {
           )}
         </section>
       </main>
-      <footer className="bg-card border-t mt-auto">
-        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addDocumentNonBlocking, deleteDocumentNonBlocking, useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking, useCollection, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -22,6 +22,7 @@ import { Pencil, Trash2, Search, PlusCircle, Instagram } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
+import type { SiteSetting } from '@/lib/settings';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
@@ -39,8 +40,13 @@ const orderSchema = z.object({
     customerAddress: z.string().min(10, 'A valid address is required'),
 });
 
+const footerSchema = z.object({
+  content: z.string().min(1, "Footer content cannot be empty."),
+});
+
 type ProductFormData = z.infer<typeof productSchema>;
 type OrderFormData = z.infer<typeof orderSchema>;
+type FooterFormData = z.infer<typeof footerSchema>;
 
 function ProductSearch() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -246,6 +252,83 @@ function OrderList() {
     )
 }
 
+function FooterEditor() {
+  const [isSubmittingFooter, setIsSubmittingFooter] = useState(false);
+  const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const footerDocRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'settings', 'footer');
+  }, [firestore]);
+
+  const { data: footerData, isLoading } = useDoc<SiteSetting>(footerDocRef);
+
+  const footerForm = useForm<FooterFormData>({
+    resolver: zodResolver(footerSchema),
+  });
+
+  useEffect(() => {
+    if (footerData) {
+      footerForm.reset({
+        content: footerData.content,
+      });
+    } else {
+        footerForm.reset({
+            content: `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.`
+        })
+    }
+  }, [footerData, footerForm]);
+
+  const onFooterSubmit: SubmitHandler<FooterFormData> = async (data) => {
+    if (!firestore) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Database not available.' });
+      return;
+    }
+    setIsSubmittingFooter(true);
+    try {
+      const docRef = doc(firestore, 'settings', 'footer');
+      await setDoc(docRef, data, { merge: true });
+      toast({ title: 'Footer Updated!', description: 'Your website footer has been saved.' });
+    } catch (error) {
+      console.error('Error updating footer:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update footer.' });
+    } finally {
+      setIsSubmittingFooter(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold font-headline mb-8">Footer Settings</h1>
+        {isLoading ? (
+            <Skeleton className="h-32 w-full" />
+        ) : (
+        <Form {...footerForm}>
+            <form onSubmit={footerForm.handleSubmit(onFooterSubmit)} className="space-y-6">
+            <FormField
+                control={footerForm.control}
+                name="content"
+                render={({ field }) => (
+                <FormItem>
+                    <FormLabel>Footer Content</FormLabel>
+                    <FormControl>
+                    <Textarea placeholder="Enter footer text here..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+                )}
+            />
+            <Button type="submit" disabled={isSubmittingFooter} className="w-full">
+                {isSubmittingFooter ? 'Saving Footer...' : 'Save Footer'}
+            </Button>
+            </form>
+        </Form>
+        )}
+    </div>
+  )
+}
+
 export default function AdminPage() {
   const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
@@ -414,6 +497,10 @@ export default function AdminPage() {
         <Separator />
 
         <OrderList />
+
+        <Separator />
+
+        <FooterEditor />
 
         <Separator />
         

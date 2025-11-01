@@ -12,6 +12,25 @@ import { ArrowLeft, Instagram } from 'lucide-react';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import type { SiteSetting } from '@/lib/settings';
+
+function SiteFooter() {
+  const firestore = useFirestore();
+  const footerDocRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'settings', 'footer');
+  }, [firestore]);
+
+  const { data: footerData } = useDoc<SiteSetting>(footerDocRef);
+
+  return (
+    <footer className="bg-card border-t mt-auto">
+      <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
+        <p>{footerData?.content || `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.`}</p>
+      </div>
+    </footer>
+  );
+}
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
@@ -64,11 +83,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                     </div>
                 </div>
             </main>
-             <footer className="bg-card border-t mt-auto">
-                <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-                    <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
-                </div>
-            </footer>
+             <SiteFooter />
         </div>
     )
   }
@@ -150,11 +165,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           </div>
         </div>
       </main>
-      <footer className="bg-card border-t mt-auto">
-        <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
