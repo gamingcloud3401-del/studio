@@ -11,8 +11,9 @@ export default function Home() {
       <header className="bg-card border-b sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center sm:justify-start h-20">
-            <Link href="/" className="text-3xl font-bold text-primary font-headline">
-              KapdaKart
+            <Link href="/" className="flex items-center gap-2 text-3xl font-bold text-primary font-headline">
+              <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
+              <span>Darpan Wears</span>
             </Link>
           </div>
         </div>
@@ -52,7 +53,7 @@ export default function Home() {
       </main>
       <footer className="bg-card border-t mt-auto">
           <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-              <p>&copy; {new Date().getFullYear()} KapdaKart. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} Darpan Wears. All rights reserved.</p>
           </div>
       </footer>
     </div>

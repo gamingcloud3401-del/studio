@@ -45,7 +45,7 @@ export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormPro
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const message = `
-New Order from KapdaKart!
+New Order from Darpan Wears!
 -------------------------
 Product ID: ${product.id}
 Product: ${product.name}
