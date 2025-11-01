@@ -25,7 +25,7 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
         {children}
       </DialogTrigger>
       <DialogContent className="max-w-4xl w-full h-auto max-h-[90vh] grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
-        <div className="flex justify-center items-start overflow-hidden rounded-l-lg">
+        <div className="flex justify-center items-start overflow-hidden rounded-t-lg md:rounded-l-lg md:rounded-t-none">
              <Carousel className="w-full h-full">
                 <CarouselContent>
                     {product.images.map((image) => (
