@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
@@ -98,16 +99,32 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         </div>
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
           <div className="flex justify-center items-start">
-             <div className="aspect-[3/4] w-full max-w-md rounded-lg overflow-hidden shadow-lg sticky top-28">
-                <Image
-                    src={product.images[0].url}
-                    alt={product.images[0].alt}
-                    width={600}
-                    height={800}
-                    className="object-cover w-full h-full"
-                    data-ai-hint={product.images[0].hint}
-                    priority
-                />
+             <div className="w-full max-w-md sticky top-28">
+                <Carousel className="rounded-lg overflow-hidden shadow-lg">
+                    <CarouselContent>
+                    {product.images.map((image) => (
+                        <CarouselItem key={image.id}>
+                        <div className="aspect-[3/4]">
+                            <Image
+                            src={image.url}
+                            alt={image.alt}
+                            width={600}
+                            height={800}
+                            className="object-cover w-full h-full"
+                            data-ai-hint={image.hint}
+                            priority={product.images.indexOf(image) === 0}
+                            />
+                        </div>
+                        </CarouselItem>
+                    ))}
+                    </CarouselContent>
+                    {product.images.length > 1 && (
+                        <>
+                            <CarouselPrevious className="left-2" />
+                            <CarouselNext className="right-2" />
+                        </>
+                    )}
+                </Carousel>
              </div>
           </div>
           <div className="flex flex-col pt-4">

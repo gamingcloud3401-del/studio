@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -18,14 +18,14 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Search } from 'lucide-react';
+import { Pencil, Trash2, Search, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
-  imageUrl: z.string().url('Please enter a valid image URL'),
+  images: z.array(z.object({ url: z.string().url('Please enter a valid image URL') })).min(1, 'Please add at least one image.'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
 });
@@ -189,10 +189,15 @@ export default function AdminPage() {
       name: '',
       description: '',
       price: 0,
-      imageUrl: '',
+      images: [{ url: '' }],
       sizes: '',
       productLink: '',
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'images'
   });
 
   const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
@@ -218,19 +223,19 @@ export default function AdminPage() {
             description: data.description,
             price: data.price,
             priceFormatted: `₹${data.price.toLocaleString('en-IN')}`,
-            images: [
+            images: data.images.map((img, index) => (
                 {
-                    id: `${productId}_img`,
-                    url: data.imageUrl,
+                    id: `${productId}_img_${index}`,
+                    url: img.url,
                     alt: data.name,
                     hint: 'product photo',
-                },
-            ],
+                }
+            )),
             sizes: data.sizes.split(',').map(s => s.trim()),
             productLink: data.productLink || '',
         };
 
-      await addDocumentNonBlocking(productsCollectionRef, newProduct);
+      await addDocumentNonBlocking(newDocRef, newProduct);
       
       toast({
         title: 'Product Added!',
@@ -308,19 +313,49 @@ export default function AdminPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
+              <div>
+                <FormLabel>Images</FormLabel>
+                <div className="space-y-4 pt-2">
+                  {fields.map((field, index) => (
+                    <FormField
+                      key={field.id}
+                      control={form.control}
+                      name={`images.${index}.url`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center gap-2">
+                            <FormControl>
+                              <Input placeholder="https://example.com/image.jpg" {...field} />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              disabled={fields.length <= 1}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => append({ url: '' })}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Image
+                </Button>
+              </div>
+
               <FormField
                 control={form.control}
                 name="sizes"

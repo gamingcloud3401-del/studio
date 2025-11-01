@@ -8,6 +8,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import type { Product } from '@/lib/products';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export default function Home() {
   const firestore = useFirestore();
@@ -57,14 +58,20 @@ export default function Home() {
                   <Card className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">
                     <CardHeader className="p-0">
                       <div className="aspect-[3/4] overflow-hidden">
-                        <Image
-                          src={product.images[0].url}
-                          alt={product.images[0].alt}
-                          width={600}
-                          height={800}
-                          className="object-cover w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
-                          data-ai-hint={product.images[0].hint}
-                        />
+                        {product.images && product.images.length > 0 ? (
+                           <Image
+                            src={product.images[0].url}
+                            alt={product.images[0].alt}
+                            width={600}
+                            height={800}
+                            className="object-cover w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
+                            data-ai-hint={product.images[0].hint}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-muted flex items-center justify-center">
+                            <span className="text-muted-foreground">No Image</span>
+                          </div>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent className="p-4">

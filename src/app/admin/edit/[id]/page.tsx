@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -13,17 +13,17 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import type { Product } from '@/lib/products';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, PlusCircle, Trash2 } from 'lucide-react';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   price: z.coerce.number().min(0, 'Price must be a positive number'),
-  imageUrl: z.string().url('Please enter a valid image URL'),
+  images: z.array(z.object({ url: z.string().url('Please enter a valid image URL') })).min(1, 'Please add at least one image.'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
 });
@@ -49,13 +49,18 @@ export default function EditProductPage() {
     resolver: zodResolver(productSchema),
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'images'
+  });
+
   useEffect(() => {
     if (product) {
       form.reset({
         name: product.name,
         description: product.description,
         price: product.price,
-        imageUrl: product.images[0]?.url || '',
+        images: product.images.map(img => ({ url: img.url })),
         sizes: product.sizes.join(', '),
         productLink: product.productLink || '',
       });
@@ -82,14 +87,14 @@ export default function EditProductPage() {
             description: data.description,
             price: data.price,
             priceFormatted: `₹${data.price.toLocaleString('en-IN')}`,
-            images: [
+            images: data.images.map((img, index) => (
                 {
-                    id: `${id}_img`,
-                    url: data.imageUrl,
+                    id: `${id}_img_${index}`,
+                    url: img.url,
                     alt: data.name,
                     hint: 'product photo',
-                },
-            ],
+                }
+            )),
             sizes: data.sizes.split(',').map(s => s.trim()),
             productLink: data.productLink || '',
         };
@@ -229,19 +234,47 @@ export default function EditProductPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <FormLabel>Images</FormLabel>
+                <div className="space-y-4 pt-2">
+                  {fields.map((field, index) => (
+                    <FormField
+                      key={field.id}
+                      control={form.control}
+                      name={`images.${index}.url`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center gap-2">
+                            <FormControl>
+                              <Input placeholder="https://example.com/image.jpg" {...field} />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => remove(index)}
+                              disabled={fields.length <= 1}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => append({ url: '' })}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Image
+                </Button>
+              </div>
               <FormField
                 control={form.control}
                 name="sizes"

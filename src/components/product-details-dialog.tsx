@@ -11,6 +11,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import ProductDetailsClient from '@/components/product-details-client';
 import type { Product } from "@/lib/products";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
 
 interface ProductDetailsDialogProps {
   product: Product;
@@ -25,16 +26,30 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
       </DialogTrigger>
       <DialogContent className="max-w-4xl w-full h-auto max-h-[90vh] grid grid-cols-1 md:grid-cols-2 gap-0 p-0">
         <div className="flex justify-center items-start overflow-hidden rounded-l-lg">
-             <div className="aspect-[3/4] w-full relative">
-                <Image
-                    src={product.images[0].url}
-                    alt={product.images[0].alt}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={product.images[0].hint}
-                    priority
-                />
-             </div>
+             <Carousel className="w-full h-full">
+                <CarouselContent>
+                    {product.images.map((image) => (
+                    <CarouselItem key={image.id}>
+                        <div className="aspect-[3/4] w-full relative">
+                            <Image
+                                src={image.url}
+                                alt={image.alt}
+                                fill
+                                className="object-cover"
+                                data-ai-hint={image.hint}
+                                priority={product.images.indexOf(image) === 0}
+                            />
+                        </div>
+                    </CarouselItem>
+                    ))}
+                </CarouselContent>
+                {product.images.length > 1 && (
+                    <>
+                        <CarouselPrevious className="left-2" />
+                        <CarouselNext className="right-2" />
+                    </>
+                )}
+            </Carousel>
         </div>
         <div className="flex flex-col p-6 sm:p-8 overflow-y-auto">
             <h1 className="text-3xl lg:text-4xl font-bold font-headline text-foreground mb-3">{product.name}</h1>
