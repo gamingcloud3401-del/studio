@@ -76,25 +76,40 @@
           "type": "string",
           "description": "Unique identifier for the Order entity."
         },
-        "customerId": {
-          "type": "string",
-          "description": "Reference to Customer. (Relationship: Customer 1:N Order)"
-        },
         "productId": {
           "type": "string",
-          "description": "Reference to Product. (Relationship: Product 1:N Order)"
+          "description": "Reference to Product."
         },
         "orderDate": {
           "type": "string",
           "description": "Date and time when the order was placed.",
           "format": "date-time"
+        },
+        "customerName": {
+            "type": "string",
+            "description": "Name of the customer."
+        },
+        "customerContact": {
+            "type": "string",
+            "description": "Contact number of the customer."
+        },
+        "customerAddress": {
+            "type": "string",
+            "description": "Address of the customer."
+        },
+        "isCompleted": {
+            "type": "boolean",
+            "description": "Whether the order is completed or not."
         }
       },
       "required": [
         "id",
-        "customerId",
         "productId",
-        "orderDate"
+        "orderDate",
+        "customerName",
+        "customerContact",
+        "customerAddress",
+        "isCompleted"
       ]
     }
   },

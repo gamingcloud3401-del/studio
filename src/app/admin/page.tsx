@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addDocumentNonBlocking, deleteDocumentNonBlocking, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking, useCollection, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,8 @@ import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Pencil, Trash2, Search, PlusCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import type { Order } from '@/lib/orders';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
@@ -30,7 +32,15 @@ const productSchema = z.object({
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
 });
 
+const orderSchema = z.object({
+    productId: z.string().min(1, 'Product ID is required'),
+    customerName: z.string().min(2, 'Customer name is required'),
+    customerContact: z.string().min(10, 'A valid contact number is required'),
+    customerAddress: z.string().min(10, 'A valid address is required'),
+});
+
 type ProductFormData = z.infer<typeof productSchema>;
+type OrderFormData = z.infer<typeof orderSchema>;
 
 function ProductSearch() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -178,12 +188,72 @@ function ProductList() {
     );
 }
 
+function OrderList() {
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const ordersCollection = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'orders');
+    }, [firestore]);
+
+    const { data: orders, isLoading } = useCollection<Order>(ordersCollection);
+
+    const handleStatusChange = (order: Order) => {
+        if (!firestore) return;
+        const docRef = doc(firestore, 'orders', order.id);
+        const newStatus = !order.isCompleted;
+        updateDocumentNonBlocking(docRef, { isCompleted: newStatus });
+        toast({
+            title: `Order ${newStatus ? 'Completed' : 'Marked as Pending'}`,
+            description: `Order for ${order.customerName} has been updated.`,
+        });
+    };
+
+    return (
+        <div className="space-y-4">
+             <h2 className="text-2xl font-bold font-headline">Manage Orders</h2>
+             <div className="border rounded-lg">
+                <div className="grid grid-cols-[1fr,1fr,2fr,1fr] p-4 font-semibold border-b bg-muted/50">
+                    <div>Product ID</div>
+                    <div>Customer</div>
+                    <div>Address</div>
+                    <div className='text-center'>Status</div>
+                </div>
+                {isLoading && <div className='p-4 text-center'>Loading orders...</div>}
+                {!isLoading && orders?.map(order => (
+                    <div key={order.id} className={`grid grid-cols-[1fr,1fr,2fr,1fr] p-4 items-center border-b last:border-b-0 ${order.isCompleted ? 'bg-green-100/50 dark:bg-green-900/20' : ''}`}>
+                        <div className='font-mono text-sm'>{order.productId}</div>
+                        <div>
+                            <p className='font-semibold'>{order.customerName}</p>
+                            <p className='text-sm text-muted-foreground'>{order.customerContact}</p>
+                        </div>
+                        <div className='text-sm text-muted-foreground'>{order.customerAddress}</div>
+                        <div className='flex justify-center'>
+                            <Switch 
+                                checked={order.isCompleted}
+                                onCheckedChange={() => handleStatusChange(order)}
+                                aria-label='Toggle order status'
+                                className="data-[state=checked]:bg-green-500 data-[state=unchecked]:bg-yellow-500"
+                            />
+                        </div>
+                    </div>
+                ))}
+                 {!isLoading && orders?.length === 0 && (
+                    <p className="text-muted-foreground text-center p-8">No orders found.</p>
+                )}
+             </div>
+        </div>
+    )
+}
+
 export default function AdminPage() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const form = useForm<ProductFormData>({
+  const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
@@ -195,12 +265,22 @@ export default function AdminPage() {
     },
   });
 
+  const orderForm = useForm<OrderFormData>({
+      resolver: zodResolver(orderSchema),
+      defaultValues: {
+          productId: '',
+          customerName: '',
+          customerContact: '',
+          customerAddress: ''
+      }
+  })
+
   const { fields, append, remove } = useFieldArray({
-    control: form.control,
+    control: productForm.control,
     name: 'images'
   });
 
-  const onSubmit: SubmitHandler<ProductFormData> = async (data) => {
+  const onProductSubmit: SubmitHandler<ProductFormData> = async (data) => {
     if (!firestore) {
         toast({
             variant: "destructive",
@@ -210,7 +290,7 @@ export default function AdminPage() {
         return;
     }
 
-    setIsSubmitting(true);
+    setIsSubmittingProduct(true);
     
     try {
         const productsCollectionRef = collection(firestore, 'products');
@@ -241,7 +321,7 @@ export default function AdminPage() {
         title: 'Product Added!',
         description: `${data.name} has been successfully added to your store.`,
       });
-      form.reset();
+      productForm.reset();
     } catch (error) {
       console.error('Error adding product:', error);
       toast({
@@ -250,9 +330,35 @@ export default function AdminPage() {
         description: 'Could not add the product. Please try again.',
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSubmittingProduct(false);
     }
   };
+
+  const onOrderSubmit: SubmitHandler<OrderFormData> = async (data) => {
+      if(!firestore) {
+          toast({ variant: "destructive", title: "Error", description: "Database not available." });
+          return;
+      }
+      setIsSubmittingOrder(true);
+      try {
+          const ordersCollectionRef = collection(firestore, 'orders');
+          const newDocRef = doc(ordersCollectionRef);
+          const newOrder = {
+              id: newDocRef.id,
+              ...data,
+              orderDate: new Date().toISOString(),
+              isCompleted: false,
+          }
+          await addDocumentNonBlocking(newDocRef, newOrder);
+          toast({ title: "Order Added!", description: `Order for ${data.customerName} has been saved.` });
+          orderForm.reset();
+      } catch (error) {
+          console.error("Error adding order:", error);
+          toast({ variant: "destructive", title: "Error", description: "Could not save the order."});
+      } finally {
+          setIsSubmittingOrder(false);
+      }
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -269,13 +375,43 @@ export default function AdminPage() {
           </div>
         </div>
       </header>
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+        
+        <div className="max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold font-headline mb-8">Add New Order</h1>
+             <Form {...orderForm}>
+                <form onSubmit={orderForm.handleSubmit(onOrderSubmit)} className="space-y-6">
+                    <FormField control={orderForm.control} name="productId" render={({field}) => (
+                        <FormItem><FormLabel>Product ID</FormLabel><FormControl><Input placeholder="e.g., prod_1" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={orderForm.control} name="customerName" render={({field}) => (
+                        <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="e.g., Jane Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={orderForm.control} name="customerContact" render={({field}) => (
+                        <FormItem><FormLabel>Customer Contact</FormLabel><FormControl><Input placeholder="e.g., 9876543210" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                     <FormField control={orderForm.control} name="customerAddress" render={({field}) => (
+                        <FormItem><FormLabel>Customer Address</FormLabel><FormControl><Textarea placeholder="Full shipping address" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <Button type="submit" disabled={isSubmittingOrder} className="w-full">
+                        {isSubmittingOrder ? 'Saving Order...' : 'Save Order'}
+                    </Button>
+                </form>
+             </Form>
+        </div>
+
+        <Separator />
+
+        <OrderList />
+
+        <Separator />
+        
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold font-headline mb-8">Add New Product</h1>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <Form {...productForm}>
+            <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-6">
               <FormField
-                control={form.control}
+                control={productForm.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
@@ -288,7 +424,7 @@ export default function AdminPage() {
                 )}
               />
               <FormField
-                control={form.control}
+                control={productForm.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
@@ -301,7 +437,7 @@ export default function AdminPage() {
                 )}
               />
               <FormField
-                control={form.control}
+                control={productForm.control}
                 name="price"
                 render={({ field }) => (
                   <FormItem>
@@ -320,7 +456,7 @@ export default function AdminPage() {
                   {fields.map((field, index) => (
                     <FormField
                       key={field.id}
-                      control={form.control}
+                      control={productForm.control}
                       name={`images.${index}.url`}
                       render={({ field }) => (
                         <FormItem>
@@ -357,7 +493,7 @@ export default function AdminPage() {
               </div>
 
               <FormField
-                control={form.control}
+                control={productForm.control}
                 name="sizes"
                 render={({ field }) => (
                   <FormItem>
@@ -370,7 +506,7 @@ export default function AdminPage() {
                 )}
               />
                <FormField
-                control={form.control}
+                control={productForm.control}
                 name="productLink"
                 render={({ field }) => (
                   <FormItem>
@@ -382,20 +518,20 @@ export default function AdminPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? 'Adding Product...' : 'Add Product'}
+              <Button type="submit" disabled={isSubmittingProduct} className="w-full">
+                {isSubmittingProduct ? 'Adding Product...' : 'Add Product'}
               </Button>
             </form>
           </Form>
         </div>
 
-        <Separator className="my-12" />
+        <Separator />
 
         <div className="max-w-2xl mx-auto">
             <ProductSearch />
         </div>
 
-        <Separator className="my-12" />
+        <Separator />
 
         <ProductList />
 
