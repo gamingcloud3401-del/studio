@@ -1,11 +1,23 @@
+'use client';
 
 import Image from 'next/image';
-import { products } from '@/lib/products';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductDetailsDialog } from '@/components/product-details-dialog';
 import Link from 'next/link';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import type { Product } from '@/lib/products';
+import { collection } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Home() {
+  const firestore = useFirestore();
+  const productsCollection = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return collection(firestore, 'products');
+  }, [firestore]);
+
+  const { data: products, isLoading } = useCollection<Product>(productsCollection);
+
   return (
     <div className="bg-background min-h-screen flex flex-col">
       <header className="bg-card border-b sticky top-0 z-40">
@@ -24,7 +36,22 @@ export default function Home() {
             Our Collection
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {products.map((product) => (
+            {isLoading && Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="group block">
+                    <Card className="h-full overflow-hidden">
+                        <CardHeader className="p-0">
+                            <div className="aspect-[3/4] overflow-hidden">
+                                <Skeleton className="w-full h-full" />
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-4 space-y-2">
+                            <Skeleton className="h-5 w-3/4" />
+                            <Skeleton className="h-6 w-1/2" />
+                        </CardContent>
+                    </Card>
+                </div>
+            ))}
+            {products?.map((product) => (
               <ProductDetailsDialog key={product.id} product={product}>
                 <div className="group block cursor-pointer">
                   <Card className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1">

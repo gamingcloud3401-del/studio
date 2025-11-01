@@ -7,4 +7,5 @@ export type ImagePlaceholder = {
   imageHint: string;
 };
 
+// This is now empty, as data is seeded into firestore.
 export const PlaceHolderImages: ImagePlaceholder[] = data.placeholderImages;
