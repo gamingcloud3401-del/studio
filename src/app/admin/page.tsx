@@ -11,8 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addDocumentNonBlocking, useFirestore } from '@/firebase';
+import { addDocumentNonBlocking, deleteDocumentNonBlocking, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
+import type { Product } from '@/lib/products';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Pencil, Trash2 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
@@ -23,6 +29,87 @@ const productSchema = z.object({
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
+
+function ProductList() {
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const productsCollection = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'products');
+    }, [firestore]);
+
+    const { data: products, isLoading } = useCollection<Product>(productsCollection);
+
+    const handleDelete = (productId: string, productName: string) => {
+        if (!firestore) return;
+        const docRef = doc(firestore, 'products', productId);
+        deleteDocumentNonBlocking(docRef);
+        toast({
+            title: 'Product Deleted',
+            description: `${productName} has been removed from your store.`,
+        });
+    };
+
+    return (
+        <div className="space-y-8">
+            <h2 className="text-2xl font-bold font-headline">Manage Products</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {isLoading && Array.from({ length: 3 }).map((_, i) => (
+                     <Card key={i}><CardContent className="p-4 space-y-4"><Skeleton className="aspect-square w-full" /><Skeleton className="h-5 w-3/4" /><Skeleton className="h-5 w-1/2" /><div className="flex justify-end gap-2 pt-2"><Skeleton className="h-9 w-20" /><Skeleton className="h-9 w-20" /></div></CardContent></Card>
+                ))}
+                {products?.map((product) => (
+                    <Card key={product.id} className="flex flex-col">
+                        <CardHeader className="p-0">
+                             <Image
+                                src={product.images[0].url}
+                                alt={product.images[0].alt}
+                                width={400}
+                                height={400}
+                                className="object-cover aspect-square rounded-t-lg"
+                             />
+                        </CardHeader>
+                        <CardContent className="p-4 flex-grow">
+                            <CardTitle className="text-lg mb-2">{product.name}</CardTitle>
+                            <p className="text-primary font-semibold">{product.priceFormatted}</p>
+                        </CardContent>
+                        <CardFooter className="p-4 pt-0 flex justify-end gap-2">
+                             <Button asChild variant="outline" size="sm">
+                                <Link href={`/admin/edit/${product.id}`}>
+                                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                                </Link>
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="destructive" size="sm">
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This action cannot be undone. This will permanently delete the product
+                                            "{product.name}".
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDelete(product.id, product.name)}>
+                                            Delete
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </CardFooter>
+                    </Card>
+                ))}
+            </div>
+            {!isLoading && products?.length === 0 && (
+                <p className="text-muted-foreground text-center py-8">No products found.</p>
+            )}
+        </div>
+    );
+}
 
 export default function AdminPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,12 +140,14 @@ export default function AdminPage() {
     setIsSubmitting(true);
     
     try {
-        const productsCollection = collection(firestore, 'products');
-        const newDocRef = doc(productsCollection);
+        const productsCollectionRef = collection(firestore, 'products');
+        // Let firestore generate the ID
+        const newDocRef = doc(productsCollectionRef); 
         const productId = newDocRef.id;
 
+
         const newProduct = {
-            id: productId,
+            id: productId, // assign the generated id
             name: data.name,
             description: data.description,
             price: data.price,
@@ -74,8 +163,9 @@ export default function AdminPage() {
             sizes: data.sizes.split(',').map(s => s.trim()),
         };
 
-      await addDocumentNonBlocking(productsCollection, newProduct);
-
+      // Pass the ref with the ID to setDoc
+      await addDocumentNonBlocking(productsCollectionRef, newProduct);
+      
       toast({
         title: 'Product Added!',
         description: `${data.name} has been successfully added to your store.`,
@@ -184,6 +274,11 @@ export default function AdminPage() {
             </form>
           </Form>
         </div>
+
+        <Separator className="my-12" />
+
+        <ProductList />
+
       </main>
     </div>
   );
