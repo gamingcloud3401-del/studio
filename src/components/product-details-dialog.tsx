@@ -24,8 +24,8 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="max-w-4xl w-full max-h-[90vh] flex flex-col md:flex-row p-0">
-        <div className="w-full md:w-1/2 flex-shrink-0">
+      <DialogContent className="max-w-4xl w-full max-h-[90vh] flex flex-col p-0">
+        <div className="md:w-1/2 flex-shrink-0 relative">
              <Carousel className="w-full h-full">
                 <CarouselContent>
                     {product.images.map((image) => (
@@ -51,7 +51,7 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
                 )}
             </Carousel>
         </div>
-        <div className="flex flex-col p-6 sm:p-8 overflow-y-auto flex-grow">
+        <div className="flex flex-col p-6 sm:p-8 flex-grow overflow-y-auto">
             <h1 className="text-3xl lg:text-4xl font-bold font-headline text-foreground mb-3">{product.name}</h1>
             <p className="text-2xl font-bold text-primary mb-4">{product.priceFormatted}</p>
             <Separator className="my-4" />
@@ -66,3 +66,4 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
     </Dialog>
   );
 }
+
