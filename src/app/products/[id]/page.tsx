@@ -168,7 +168,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                                 alt={image.alt}
                                 width={600}
                                 height={800}
-                                className="object-cover w-full h-full"
+                                className="object-contain w-full h-full"
                                 data-ai-hint={image.hint}
                                 priority={index === 0 && !product.videoUrl}
                                 />

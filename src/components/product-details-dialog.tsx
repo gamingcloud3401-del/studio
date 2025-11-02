@@ -72,7 +72,7 @@ function ProductContent({ product }: { product: Product }) {
                                         src={image.url}
                                         alt={image.alt}
                                         fill
-                                        className="object-cover"
+                                        className="object-contain"
                                         data-ai-hint={image.hint}
                                         priority={index === 0}
                                     />
@@ -147,7 +147,7 @@ export function ProductDetailsDialog({ product, children }: ProductDetailsDialog
                                                 src={image.url}
                                                 alt={image.alt}
                                                 fill
-                                                className="object-cover"
+                                                className="object-contain"
                                                 data-ai-hint={image.hint}
                                                 priority={index === 0}
                                             />

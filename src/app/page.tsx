@@ -119,7 +119,7 @@ export default function Home() {
                             alt={product.images[0].alt}
                             width={600}
                             height={800}
-                            className="object-cover w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
+                            className="object-contain w-full h-full transition-transform duration-300 ease-in-out group-hover:scale-105"
                             data-ai-hint={product.images[0].hint}
                           />
                         ) : (
