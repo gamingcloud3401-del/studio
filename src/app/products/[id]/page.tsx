@@ -133,10 +133,10 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         </div>
       </header>
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow">
-        <div className="mb-6">
-            <Button asChild variant="ghost">
+        <div className="mb-8">
+            <Button asChild size="lg" variant="outline">
                 <Link href="/">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    <ArrowLeft className="mr-2 h-5 w-5" />
                     Back to Products
                 </Link>
             </Button>
