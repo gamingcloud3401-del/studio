@@ -9,8 +9,10 @@ import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase
 import type { Product } from '@/lib/products';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Instagram } from 'lucide-react';
+import { Instagram, Search } from 'lucide-react';
 import type { SiteSetting } from '@/lib/settings';
+import { useState, useMemo } from 'react';
+import { Input } from '@/components/ui/input';
 
 function SiteFooter() {
   const firestore = useFirestore();
@@ -31,6 +33,7 @@ function SiteFooter() {
 }
 
 export default function Home() {
+  const [searchTerm, setSearchTerm] = useState('');
   const firestore = useFirestore();
   const productsCollection = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -38,6 +41,15 @@ export default function Home() {
   }, [firestore]);
 
   const { data: products, isLoading } = useCollection<Product>(productsCollection);
+
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    if (!searchTerm) return products;
+    return products.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [products, searchTerm]);
+
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
@@ -64,9 +76,21 @@ export default function Home() {
       </header>
       <main className="flex-grow">
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-12 text-center font-headline">
+          <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-8 text-center font-headline">
             Our Collection
           </h2>
+          <div className="mb-12 max-w-md mx-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search for products..."
+                className="w-full pl-10 h-12 text-lg"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {isLoading && Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="group block">
@@ -83,7 +107,7 @@ export default function Home() {
                     </Card>
                 </div>
             ))}
-            {!isLoading && products?.map((product) => (
+            {!isLoading && filteredProducts.map((product) => (
               <ProductDetailsDialog key={product.id} product={product}>
                 <div className="group block cursor-pointer">
                   <Card className="h-full overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2">
@@ -114,11 +138,18 @@ export default function Home() {
               </ProductDetailsDialog>
             ))}
           </div>
-           {!isLoading && products?.length === 0 && (
+           {!isLoading && filteredProducts.length === 0 && (
             <div className="text-center text-muted-foreground py-12">
               <h3 className="text-2xl font-semibold">No Products Found</h3>
-              <p className="mt-2">It looks like there are no products in the database.</p>
-              <p className="mt-1">Try running <code className="bg-muted px-2 py-1 rounded">npm run db:seed</code> in the terminal to add them.</p>
+              <p className="mt-2">
+                {searchTerm 
+                    ? `Your search for "${searchTerm}" did not match any products.`
+                    : "It looks like there are no products in the store."
+                }
+                </p>
+                {!products && (
+                    <p className="mt-1">Try running <code className="bg-muted px-2 py-1 rounded">npm run db:seed</code> in the terminal to add them.</p>
+                )}
             </div>
           )}
         </section>
