@@ -110,6 +110,11 @@
         "isCompleted": {
             "type": "boolean",
             "description": "Whether the order is completed or not."
+        },
+        "completedDate": {
+            "type": "string",
+            "description": "Date and time when the order was completed.",
+            "format": "date-time"
         }
       },
       "required": [

@@ -64,6 +64,7 @@ export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormPro
                 customerAddress: values.address,
                 orderDate: new Date().toISOString(),
                 isCompleted: false,
+                completedDate: "",
                 productDetails: { // Optional: for easier reference in admin panel
                     name: product.name,
                     price: product.salePrice,
