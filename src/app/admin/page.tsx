@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
@@ -35,19 +35,11 @@ const productSchema = z.object({
   videoUrl: z.string().url('Please enter a valid video URL').optional().or(z.literal('')),
 });
 
-const orderSchema = z.object({
-    productId: z.string().min(1, 'Product ID is required'),
-    customerName: z.string().min(2, 'Customer name is required'),
-    customerContact: z.string().min(10, 'A valid contact number is required'),
-    customerAddress: z.string().min(10, 'A valid address is required'),
-});
-
 const footerSchema = z.object({
   content: z.string().min(1, "Footer content cannot be empty."),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
-type OrderFormData = z.infer<typeof orderSchema>;
 type FooterFormData = z.infer<typeof footerSchema>;
 
 function ProductSearch() {
@@ -211,7 +203,7 @@ function OrderList() {
 
     const { data: orders, isLoading } = useCollection<Order>(ordersCollection);
 
-    const filteredOrders = useMemoFirebase(() => {
+    const filteredOrders = useMemo(() => {
         if (!orders) return [];
         if (!searchTerm) return orders;
         return orders.filter(order => 
@@ -358,8 +350,7 @@ function FooterEditor() {
 
 export default function AdminPage() {
   const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
-  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-
+  
   const { toast } = useToast();
   const firestore = useFirestore();
 
@@ -377,15 +368,6 @@ export default function AdminPage() {
     },
   });
 
-  const orderForm = useForm<OrderFormData>({
-      resolver: zodResolver(orderSchema),
-      defaultValues: {
-          productId: '',
-          customerName: '',
-          customerContact: '',
-          customerAddress: ''
-      }
-  })
 
   const { fields, append, remove } = useFieldArray({
     control: productForm.control,
@@ -448,31 +430,6 @@ export default function AdminPage() {
     }
   };
 
-  const onOrderSubmit: SubmitHandler<OrderFormData> = async (data) => {
-      if(!firestore) {
-          toast({ variant: "destructive", title: "Error", description: "Database not available." });
-          return;
-      }
-      setIsSubmittingOrder(true);
-      try {
-          const ordersCollectionRef = collection(firestore, 'orders');
-          const newDocRef = doc(ordersCollectionRef);
-          const newOrder = {
-              id: newDocRef.id,
-              ...data,
-              orderDate: new Date().toISOString(),
-              isCompleted: false,
-          }
-          await addDocumentNonBlocking(newDocRef, newOrder);
-          toast({ title: "Order Added!", description: `Order for ${data.customerName} has been saved.` });
-          orderForm.reset();
-      } catch (error) {
-          console.error("Error adding order:", error);
-          toast({ variant: "destructive", title: "Error", description: "Could not save the order."});
-      } finally {
-          setIsSubmittingOrder(false);
-      }
-  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -501,31 +458,6 @@ export default function AdminPage() {
         </div>
       </header>
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
-        
-        <div className="max-w-2xl mx-auto">
-            <h1 className="text-3xl font-bold font-headline mb-8">Add New Order</h1>
-             <Form {...orderForm}>
-                <form onSubmit={orderForm.handleSubmit(onOrderSubmit)} className="space-y-6">
-                    <FormField control={orderForm.control} name="productId" render={({field}) => (
-                        <FormItem><FormLabel>Product ID</FormLabel><FormControl><Input placeholder="e.g., prod_1" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField control={orderForm.control} name="customerName" render={({field}) => (
-                        <FormItem><FormLabel>Customer Name</FormLabel><FormControl><Input placeholder="e.g., Jane Doe" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                     <FormField control={orderForm.control} name="customerContact" render={({field}) => (
-                        <FormItem><FormLabel>Customer Contact</FormLabel><FormControl><Input placeholder="e.g., 9876543210" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                     <FormField control={orderForm.control} name="customerAddress" render={({field}) => (
-                        <FormItem><FormLabel>Customer Address</FormLabel><FormControl><Textarea placeholder="Full shipping address" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <Button type="submit" disabled={isSubmittingOrder} className="w-full">
-                        {isSubmittingOrder ? 'Saving Order...' : 'Save Order'}
-                    </Button>
-                </form>
-             </Form>
-        </div>
-
-        <Separator />
 
         <OrderList />
 

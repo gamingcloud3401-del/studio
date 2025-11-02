@@ -18,6 +18,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Product } from "@/lib/products";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { addDocumentNonBlocking, useFirestore } from "@/firebase";
+import { collection, doc } from "firebase/firestore";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -35,6 +38,9 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormProps) {
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,7 +50,41 @@ export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormPro
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+     // 1. Save order to Firestore
+    if (firestore) {
+        try {
+            const ordersCollectionRef = collection(firestore, 'orders');
+            const newDocRef = doc(ordersCollectionRef);
+            const newOrder = {
+                id: newDocRef.id,
+                productId: product.id,
+                customerName: values.name,
+                customerContact: values.phone,
+                customerAddress: values.address,
+                orderDate: new Date().toISOString(),
+                isCompleted: false,
+                productDetails: { // Optional: for easier reference in admin panel
+                    name: product.name,
+                    price: product.salePrice,
+                    size: selectedSize
+                }
+            };
+            // Use a non-blocking write
+            await addDocumentNonBlocking(newDocRef, newOrder);
+        } catch (error) {
+            console.error("Error saving order to Firestore:", error);
+            // Optionally notify user of failure, though we proceed to WhatsApp anyway
+            toast({
+                variant: 'destructive',
+                title: 'Order could not be saved automatically',
+                description: 'Please ensure you send the WhatsApp message.'
+            });
+        }
+    }
+
+
+    // 2. Open WhatsApp
     const message = `
 New Order from Darpan Wears!
 -------------------------
@@ -66,6 +106,7 @@ Address: ${values.address}
 
     window.open(whatsappUrl, '_blank');
     
+    // 3. Close the dialog
     setDialogOpen(false);
   }
 
