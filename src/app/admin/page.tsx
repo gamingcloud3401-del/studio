@@ -31,6 +31,7 @@ const productSchema = z.object({
   images: z.array(z.object({ url: z.string().url('Please enter a valid image URL') })).min(1, 'Please add at least one image.'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
+  videoUrl: z.string().url('Please enter a valid video URL').optional().or(z.literal('')),
 });
 
 const orderSchema = z.object({
@@ -367,6 +368,7 @@ export default function AdminPage() {
       images: [{ url: '' }],
       sizes: '',
       productLink: '',
+      videoUrl: '',
     },
   });
 
@@ -418,6 +420,7 @@ export default function AdminPage() {
             )),
             sizes: data.sizes.split(',').map(s => s.trim()),
             productLink: data.productLink || '',
+            videoUrl: data.videoUrl || '',
         };
 
       await addDocumentNonBlocking(newDocRef, newProduct);
@@ -625,6 +628,19 @@ export default function AdminPage() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={productForm.control}
+                name="videoUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Video URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/video.mp4" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
                <FormField
                 control={productForm.control}
                 name="productLink"
@@ -659,7 +675,3 @@ export default function AdminPage() {
     </div>
   );
 }
-
-    
-
-    

@@ -13,6 +13,7 @@ export type Product = {
   }[];
   sizes: string[];
   productLink?: string;
+  videoUrl?: string;
 };
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {

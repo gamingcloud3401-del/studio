@@ -32,6 +32,21 @@ function SiteFooter() {
   );
 }
 
+const getYouTubeEmbedUrl = (url: string) => {
+    let videoId;
+    if (url.includes('youtube.com/watch')) {
+        const urlParams = new URLSearchParams(new URL(url).search);
+        videoId = urlParams.get('v');
+    } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split('?')[0];
+    }
+    if(videoId) {
+        return `https://www.youtube.com/embed/${videoId}`;
+    }
+    // Return original url if not a youtube link, maybe it's a direct video file.
+    return url;
+}
+
 export default function ProductPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
   const productRef = useMemoFirebase(() => {
@@ -91,6 +106,8 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   if (!product) {
     notFound();
   }
+  
+  const hasMedia = (product.videoUrl && product.videoUrl.length > 0) || product.images.length > 0;
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
@@ -127,31 +144,50 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
           <div className="flex justify-center items-start">
              <div className="w-full max-w-md sticky top-28">
-                <Carousel className="rounded-lg overflow-hidden shadow-lg">
-                    <CarouselContent>
-                    {product.images.map((image) => (
-                        <CarouselItem key={image.id}>
-                        <div className="aspect-[3/4]">
-                            <Image
-                            src={image.url}
-                            alt={image.alt}
-                            width={600}
-                            height={800}
-                            className="object-cover w-full h-full"
-                            data-ai-hint={image.hint}
-                            priority={product.images.indexOf(image) === 0}
-                            />
-                        </div>
-                        </CarouselItem>
-                    ))}
-                    </CarouselContent>
-                    {product.images.length > 1 && (
-                        <>
-                            <CarouselPrevious className="left-2" />
-                            <CarouselNext className="right-2" />
-                        </>
-                    )}
-                </Carousel>
+                {hasMedia ? (
+                    <Carousel className="rounded-lg overflow-hidden shadow-lg">
+                        <CarouselContent>
+                        {product.videoUrl && (
+                             <CarouselItem>
+                                <div className="aspect-video w-full">
+                                    <iframe
+                                        className="w-full h-full"
+                                        src={getYouTubeEmbedUrl(product.videoUrl)}
+                                        title="Product Video"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    ></iframe>
+                                </div>
+                            </CarouselItem>
+                        )}
+                        {product.images.map((image, index) => (
+                            <CarouselItem key={image.id}>
+                            <div className="aspect-[3/4]">
+                                <Image
+                                src={image.url}
+                                alt={image.alt}
+                                width={600}
+                                height={800}
+                                className="object-cover w-full h-full"
+                                data-ai-hint={image.hint}
+                                priority={index === 0 && !product.videoUrl}
+                                />
+                            </div>
+                            </CarouselItem>
+                        ))}
+                        </CarouselContent>
+                        {(product.images.length + (product.videoUrl ? 1 : 0)) > 1 && (
+                            <>
+                                <CarouselPrevious className="left-2" />
+                                <CarouselNext className="right-2" />
+                            </>
+                        )}
+                    </Carousel>
+                ) : (
+                    <div className="aspect-[3/4] w-full max-w-md rounded-lg overflow-hidden shadow-lg sticky top-28 bg-muted flex items-center justify-center">
+                        <span className="text-muted-foreground">No Media</span>
+                    </div>
+                )}
              </div>
           </div>
           <div className="flex flex-col pt-4">
@@ -169,5 +205,3 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
-
-    

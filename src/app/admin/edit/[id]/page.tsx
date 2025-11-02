@@ -26,6 +26,7 @@ const productSchema = z.object({
   images: z.array(z.object({ url: z.string().url('Please enter a valid image URL') })).min(1, 'Please add at least one image.'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
+  videoUrl: z.string().url('Please enter a valid video URL').optional().or(z.literal('')),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -63,6 +64,7 @@ export default function EditProductPage() {
         images: product.images.map(img => ({ url: img.url })),
         sizes: product.sizes.join(', '),
         productLink: product.productLink || '',
+        videoUrl: product.videoUrl || '',
       });
     }
   }, [product, form]);
@@ -97,6 +99,7 @@ export default function EditProductPage() {
             )),
             sizes: data.sizes.split(',').map(s => s.trim()),
             productLink: data.productLink || '',
+            videoUrl: data.videoUrl || '',
         };
 
       await setDoc(docRef, updatedProduct, { merge: true });
@@ -137,6 +140,7 @@ export default function EditProductPage() {
                     <div className="space-y-6">
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-20 w-full" /></div>
+                        <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
                         <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-10 w-full" /></div>
@@ -301,6 +305,19 @@ export default function EditProductPage() {
               />
               <FormField
                 control={form.control}
+                name="videoUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Video URL (Optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://example.com/video.mp4" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="productLink"
                 render={({ field }) => (
                   <FormItem>
@@ -322,5 +339,3 @@ export default function EditProductPage() {
     </div>
   );
 }
-
-    
