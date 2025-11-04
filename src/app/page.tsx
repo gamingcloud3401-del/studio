@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import Image from 'next/image';
@@ -278,8 +279,8 @@ export default function Home() {
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(category => (
-                      <SelectItem key={category} value={category} className="capitalize">
+                    {categories.map((category, index) => (
+                      <SelectItem key={`${category}-${index}`} value={category} className="capitalize">
                         {category}
                       </SelectItem>
                     ))}
