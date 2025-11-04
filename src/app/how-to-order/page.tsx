@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Bot, MessageSquare, ShoppingCart, Info, Send } from "lucide-react";
+import { ArrowLeft, Bot, MessageSquare, ShoppingCart, Info, Send, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const steps = [
@@ -95,6 +95,15 @@ export default function HowToOrderPage() {
                         <MessageSquare className="mr-2" /> Talk to Darpan 2.0 (Coming Soon)
                     </Button>
                 </div>
+            </div>
+
+            <div className="mt-16 text-center">
+                 <Button asChild variant="link">
+                    <Link href="/privacy-policy">
+                         <Shield className="mr-2 h-4 w-4" />
+                        View our Privacy Policy
+                    </Link>
+                </Button>
             </div>
             
         </div>

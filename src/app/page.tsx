@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -107,11 +108,6 @@ function HeroCarousel() {
                             <Link href="/how-to-order">
                                 <HelpCircle className="mr-3" />
                                 How to Order
-                            </Link>
-                        </Button>
-                         <Button size="lg" variant="link" className="text-white/80 hover:text-white text-md" asChild>
-                            <Link href="/privacy-policy">
-                                Privacy Policy
                             </Link>
                         </Button>
                     </div>
