@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -103,12 +104,6 @@ function HeroCarousel() {
                     >
                         Welcome to Darpan Wears
                     </h2>
-                    <p 
-                        className="mt-4 text-lg sm:text-xl md:text-2xl font-body"
-                        style={{ textShadow: '1px 2px 5px rgba(0,0,0,0.8)' }}
-                    >
-                        Your one-stop shop for the latest fashion.
-                    </p>
                     <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
                         <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" onClick={scrollToProducts}>
                             <ShoppingCart className="mr-3" />
@@ -224,7 +219,7 @@ export default function Home() {
                 <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
                 <span>Darpan Wears</span>
                 </Link>
-                <Image src="https://i.postimg.cc/wTjXzYpT/indian-flag-waving.gif" alt="Indian Flag" width={40} height={27} className="hidden sm:block" />
+                <Image src="https://postimg.cc/wTjXzYpT" alt="Indian Flag" width={40} height={27} className="hidden sm:block" />
                 <Link
                     href="https://www.instagram.com/darpan_wears?igsh=a2pkYXhpajVwNnR3"
                     target="_blank"
@@ -368,3 +363,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
