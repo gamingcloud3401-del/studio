@@ -1,6 +1,31 @@
 
 {
   "entities": {
+    "HeroImage": {
+      "title": "Hero Image",
+      "type": "object",
+      "description": "Represents a slide in the homepage hero carousel.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Hero Image."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the hero image.",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string",
+          "description": "The main title text to display over the image."
+        }
+      },
+      "required": [
+        "id",
+        "imageUrl",
+        "title"
+      ]
+    },
     "Product": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Product",
@@ -194,6 +219,22 @@
   },
   "firestore": {
     "structure": [
+      {
+        "path": "/heroImages/{heroImageId}",
+        "definition": {
+          "entityName": "HeroImage",
+          "schema": {
+            "$ref": "#/backend/entities/HeroImage"
+          },
+          "description": "Stores the slides for the homepage hero carousel.",
+          "params": [
+            {
+              "name": "heroImageId",
+              "description": "Unique identifier for the hero image."
+            }
+          ]
+        }
+      },
       {
         "path": "/products/{productId}",
         "definition": {

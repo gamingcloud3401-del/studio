@@ -19,11 +19,11 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone } from 'lucide-react';
+import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
-import type { PaymentSetting, SiteSetting, AnnouncementSetting } from '@/lib/settings';
+import type { PaymentSetting, SiteSetting, AnnouncementSetting, HeroImage } from '@/lib/settings';
 import { format } from 'date-fns';
 
 const productSchema = z.object({
@@ -50,11 +50,17 @@ const paymentSchema = z.object({
   isCashOnDeliveryEnabled: z.boolean(),
 });
 
+const heroImageSchema = z.object({
+  title: z.string().min(3, 'Title is required.'),
+  imageUrl: z.string().url('Please enter a valid image URL.'),
+});
+
 
 type ProductFormData = z.infer<typeof productSchema>;
 type FooterFormData = z.infer<typeof footerSchema>;
 type AnnouncementFormData = z.infer<typeof announcementSchema>;
 type PaymentFormData = z.infer<typeof paymentSchema>;
+type HeroImageFormData = z.infer<typeof heroImageSchema>;
 
 function ProductSearch() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -551,6 +557,156 @@ function SiteSettings() {
   )
 }
 
+function HeroImageManager() {
+    const firestore = useFirestore();
+    const { toast } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const heroImagesCollection = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'heroImages');
+    }, [firestore]);
+
+    const { data: heroImages, isLoading } = useCollection<HeroImage>(heroImagesCollection);
+
+    const form = useForm<HeroImageFormData>({
+        resolver: zodResolver(heroImageSchema),
+        defaultValues: {
+            title: '',
+            imageUrl: '',
+        },
+    });
+
+    const onSubmit: SubmitHandler<HeroImageFormData> = async (data) => {
+        if (!firestore) return;
+        setIsSubmitting(true);
+        try {
+            const newDocRef = doc(heroImagesCollection!);
+            const newHeroImage = {
+                id: newDocRef.id,
+                title: data.title,
+                imageUrl: data.imageUrl,
+            };
+            await addDocumentNonBlocking(newDocRef, newHeroImage);
+            toast({
+                title: 'Hero Image Added!',
+                description: 'The new image has been added to your homepage carousel.',
+            });
+            form.reset();
+        } catch (error) {
+            console.error('Error adding hero image:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not add the hero image.',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDelete = (imageId: string, imageTitle: string) => {
+        if (!firestore) return;
+        const docRef = doc(firestore, 'heroImages', imageId);
+        deleteDocumentNonBlocking(docRef);
+        toast({
+            title: 'Hero Image Deleted',
+            description: `The image "${imageTitle}" has been removed.`,
+        });
+    };
+
+    return (
+        <div className="max-w-2xl mx-auto space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold font-headline mb-8 flex items-center gap-3">
+                    <ImageIcon className="h-8 w-8" />
+                    Manage Hero Section
+                </h1>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Add New Hero Image</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Title</FormLabel>
+                                            <FormDescription>Text to display over the image.</FormDescription>
+                                            <FormControl>
+                                                <Input placeholder="e.g., Summer Collection is Here!" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="imageUrl"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Image URL</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="https://example.com/image.jpg" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button type="submit" disabled={isSubmitting} className="w-full">
+                                    {isSubmitting ? 'Adding Image...' : 'Add Hero Image'}
+                                </Button>
+                            </form>
+                        </Form>
+                    </CardContent>
+                </Card>
+            </div>
+            <div>
+                <h2 className="text-2xl font-bold font-headline mb-4">Current Hero Images</h2>
+                <div className="space-y-4">
+                    {isLoading && Array.from({length: 1}).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+                    {heroImages && heroImages.length > 0 ? (
+                        heroImages.map(image => (
+                            <Card key={image.id}>
+                                <CardContent className="p-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <Image src={image.imageUrl} alt={image.title} width={80} height={80} className="rounded-md object-cover aspect-square" />
+                                        <div>
+                                            <p className="font-semibold">{image.title}</p>
+                                            <p className="text-xs text-muted-foreground truncate max-w-xs">{image.imageUrl}</p>
+                                        </div>
+                                    </div>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete this image?</AlertDialogTitle>
+                                                <AlertDialogDescription>This will remove the image "{image.title}" from your hero section. This cannot be undone.</AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(image.id, image.title)}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </CardContent>
+                            </Card>
+                        ))
+                    ) : (
+                        <p className="text-muted-foreground text-center py-4">No hero images have been added yet.</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
 export default function AdminPage() {
   const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
   const router = useRouter();
@@ -704,6 +860,10 @@ export default function AdminPage() {
         <Separator />
 
         <SiteSettings />
+
+        <Separator />
+
+        <HeroImageManager />
 
         <Separator />
         

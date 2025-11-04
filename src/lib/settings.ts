@@ -13,3 +13,9 @@ export type AnnouncementSetting = {
     id: string;
     content: string;
 };
+
+export type HeroImage = {
+    id: string;
+    imageUrl: string;
+    title: string;
+};

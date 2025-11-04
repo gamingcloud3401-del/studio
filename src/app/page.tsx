@@ -10,7 +10,7 @@ import type { Product } from '@/lib/products';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Instagram, Search, PackageSearch, Megaphone } from 'lucide-react';
-import type { SiteSetting, AnnouncementSetting } from '@/lib/settings';
+import type { SiteSetting, AnnouncementSetting, HeroImage } from '@/lib/settings';
 import { useState, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
@@ -63,15 +63,18 @@ function AnnouncementBar() {
   )
 }
 
-function HeroCarousel({ products, isLoading }: { products: Product[] | null, isLoading: boolean }) {
+function HeroCarousel() {
     const plugin = useRef(
         Autoplay({ delay: 3000, stopOnInteraction: true })
     );
 
-    const allImages = useMemo(() => {
-        if (!products) return [];
-        return products.flatMap(p => p.images.length > 0 ? [p.images[0]] : []);
-    }, [products]);
+    const firestore = useFirestore();
+    const heroImagesCollection = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return collection(firestore, 'heroImages');
+    }, [firestore]);
+
+    const { data: heroImages, isLoading } = useCollection<HeroImage>(heroImagesCollection);
 
     if (isLoading) {
         return (
@@ -81,8 +84,18 @@ function HeroCarousel({ products, isLoading }: { products: Product[] | null, isL
         )
     }
 
-    if (!allImages || allImages.length === 0) {
-        return null; // Don't show carousel if there are no images
+    if (!heroImages || heroImages.length === 0) {
+        return (
+             <section className="w-full mb-12 border rounded-lg overflow-hidden shadow-lg relative bg-muted">
+                <div className="w-full aspect-square flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+                        <h2 className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold text-white text-center p-4" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
+                            Welcome to Darpan Wears
+                        </h2>
+                    </div>
+                </div>
+            </section>
+        );
     }
 
     return (
@@ -97,26 +110,26 @@ function HeroCarousel({ products, isLoading }: { products: Product[] | null, isL
                 }}
             >
                 <CarouselContent>
-                    {allImages.map((image, index) => (
+                    {heroImages.map((image, index) => (
                         <CarouselItem key={index}>
                             <div className="w-full aspect-square relative">
                                 <Image
-                                    src={image.url}
-                                    alt={image.alt}
+                                    src={image.imageUrl}
+                                    alt={image.title}
                                     fill
                                     className="object-cover"
                                     priority={index === 0}
                                 />
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
+                                    <h2 className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold text-white text-center p-4" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
+                                        {image.title}
+                                    </h2>
+                                </div>
                             </div>
                         </CarouselItem>
                     ))}
                 </CarouselContent>
             </Carousel>
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-                <h2 className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold text-white text-center p-4" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
-                    Welcome to Darpan Wears
-                </h2>
-            </div>
         </section>
     );
 }
@@ -186,7 +199,7 @@ export default function Home() {
           </div>
           
           <AnnouncementBar />
-          <HeroCarousel products={products} isLoading={isLoading} />
+          <HeroCarousel />
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {isLoading && Array.from({ length: 6 }).map((_, i) => (

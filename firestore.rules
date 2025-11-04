@@ -5,6 +5,7 @@
  * This ruleset prioritizes security by enforcing strict ownership for customer data and allowing public read access to product and order information. Write access to products and orders is open for prototyping but MUST be secured in production by implementing a suitable access control mechanism, such as role-based access control (RBAC) or attribute-based access control (ABAC).
  *
  * Data Structure:
+ * - /heroImages/{heroImageId}: Stores slides for the hero carousel. Public read, admin-only write.
  * - /products/{productId}: Stores product details. Read access is public, while write access is currently open for prototyping.
  * - /customers/{customerId}: Stores customer data, with access restricted to the owning user.
  * - /orders/{orderId}: Stores order information. Read access is public, while write access is currently open for prototyping. Each order includes references to customerId and productId.
@@ -26,6 +27,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    /**
+     * @description Allows public read access to hero images, but write access is restricted.
+     * @path /heroImages/{heroImageId}
+     * @allow get, list: Allows any user to read hero images.
+     * @allow create, update, delete: Open for prototyping, should be admin-only in production.
+     */
+    match /heroImages/{heroImageId} {
+      allow get: if true;
+      allow list: if true;
+      allow create, update, delete: if true; // TODO: Secure in production to be admin-only.
+    }
 
     /**
      * @description Allows public read access to product data and open write access for prototyping.
