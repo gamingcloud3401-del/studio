@@ -73,9 +73,6 @@ export default function Home() {
                     <span className="sr-only">Instagram</span>
                 </Link>
             </div>
-            <Button asChild>
-              <Link href="/admin">Admin Panel</Link>
-            </Button>
           </div>
         </div>
       </header>
