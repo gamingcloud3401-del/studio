@@ -48,7 +48,7 @@ function HeroCarousel({ products, isLoading }: { products: Product[] | null, isL
     if (isLoading) {
         return (
             <section className="w-full mb-12">
-                <Skeleton className="w-full aspect-[16/9] md:aspect-[21/9] object-cover" />
+                <Skeleton className="w-full aspect-square object-cover" />
             </section>
         )
     }
@@ -71,7 +71,7 @@ function HeroCarousel({ products, isLoading }: { products: Product[] | null, isL
                 <CarouselContent>
                     {allImages.map((image, index) => (
                         <CarouselItem key={index}>
-                            <div className="w-full aspect-[16/9] md:aspect-[21/9] relative">
+                            <div className="w-full aspect-square relative">
                                 <Image
                                     src={image.url}
                                     alt={image.alt}
