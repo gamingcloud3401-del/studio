@@ -18,12 +18,13 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon, Shield, Bot } from 'lucide-react';
+import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon, Shield, Bot, HelpCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
 import type { PaymentSetting, SiteSetting, AnnouncementSetting, HeroImage } from '@/lib/settings';
 import { format } from 'date-fns';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
@@ -65,6 +66,60 @@ type PrivacyPolicyFormData = z.infer<typeof privacyPolicySchema>;
 type AnnouncementFormData = z.infer<typeof announcementSchema>;
 type PaymentFormData = z.infer<typeof paymentSchema>;
 type HeroImageFormData = z.infer<typeof heroImageSchema>;
+
+function AdminGuide() {
+    return (
+        <div className="max-w-2xl mx-auto space-y-8">
+             <div>
+                <h1 className="text-3xl font-bold font-headline mb-8 flex items-center gap-3">
+                    <HelpCircle className="h-8 w-8" />
+                    How to Use This Admin Panel
+                </h1>
+                <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger>Managing Orders</AccordionTrigger>
+                        <AccordionContent className='space-y-2'>
+                            <p>This section shows all incoming orders from customers. You can see customer details, the product they ordered, and the date.</p>
+                            <p>Use the toggle switch to mark an order as 'Completed'. This will help you keep track of your fulfillment process. Use the trash icon to delete an order entirely.</p>
+                            <p>You can also search for specific orders using the search bar.</p>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                        <AccordionTrigger>Site Settings</AccordionTrigger>
+                        <AccordionContent className='space-y-2'>
+                             <p>Here you can control global settings for your website:</p>
+                            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                <li><strong>Payment Settings:</strong> Globally enable or disable Cash on Delivery.</li>
+                                <li><strong>Announcement Bar:</strong> Set a promotional message that appears on your homepage. Leave it blank to hide the bar.</li>
+                                <li><strong>Footer Content:</strong> Change the text that appears at the bottom of every page.</li>
+                                <li><strong>Privacy Policy:</strong> Edit the content of your privacy policy page.</li>
+                            </ul>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-3">
+                        <AccordionTrigger>Manage Hero Section</AccordionTrigger>
+                        <AccordionContent>
+                            <p>This section allows you to manage the big image carousel on your homepage. You can add new images by providing a URL. You can also see a list of current images and delete any you no longer want.</p>
+                        </AccordionContent>
+                    </AccordionItem>
+                     <AccordionItem value="item-4">
+                        <AccordionTrigger>Darpan 2.0 AI Assistant</AccordionTrigger>
+                        <AccordionContent>
+                           <p>The AI assistant automatically learns from your product list. To provide it with more business-specific information (like shipping policies, return information, etc.), you can edit its core prompt in the file: <code className='bg-muted px-2 py-1 rounded-md'>src/ai/flows/darpan-flow.ts</code>.</p>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-5">
+                        <AccordionTrigger>Adding & Editing Products</AccordionTrigger>
+                        <AccordionContent className='space-y-2'>
+                             <p>Use the "Add New Product" form to add items to your store. Fill in all the details, including name, price, description, sizes, and at least one image URL.</p>
+                             <p>The "Manage Products" section below shows all your current products. You can click "Edit" to go to a separate page to update a product's details, or "Delete" to remove it permanently.</p>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+             </div>
+        </div>
+    )
+}
 
 function ProductSearch() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -936,7 +991,11 @@ export default function AdminPage() {
         </div>
       </header>
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+        
+        <AdminGuide />
 
+        <Separator />
+        
         <OrderList />
 
         <Separator />
