@@ -9,14 +9,14 @@ import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase
 import type { Product } from '@/lib/products';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Instagram, Search, PackageSearch, Megaphone, ShoppingCart, HelpCircle, Shield } from 'lucide-react';
+import { Instagram, Search, PackageSearch, Megaphone, ShoppingCart, HelpCircle, Shield, Bot } from 'lucide-react';
 import type { SiteSetting, AnnouncementSetting, HeroImage } from '@/lib/settings';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import Autoplay from "embla-carousel-autoplay";
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { CustomerDetailsForm, type CustomerDetails } from '@/components/customer-details-form';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -367,10 +367,6 @@ export default function Home() {
           )}
         </section>
 
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <Separator className="my-12" />
-            <DarpanAssistant />
-        </section>
       </main>
       <SiteFooter />
     </div>
