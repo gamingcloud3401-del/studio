@@ -1,4 +1,5 @@
 
+
 export type Product = {
   id: string;
   name: string;
@@ -15,6 +16,7 @@ export type Product = {
   sizes: string[];
   productLink?: string;
   videoUrl?: string;
+  isCashOnDeliveryAvailable?: boolean;
 };
 
 export const getProductById = async (id: string): Promise<Product | undefined> => {

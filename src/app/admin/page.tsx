@@ -32,6 +32,7 @@ const productSchema = z.object({
   salePrice: z.coerce.number().min(0, 'Sale price must be a positive number'),
   images: z.array(z.object({ url: z.string().url('Please enter a valid image URL') })).min(1, 'Please add at least one image.'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
+  isCashOnDeliveryAvailable: z.boolean(),
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
   videoUrl: z.string().url('Please enter a valid video URL').optional().or(z.literal('')),
 });
@@ -425,9 +426,9 @@ function SiteSettings() {
                             render={({ field }) => (
                                 <FormItem className="flex flex-row items-center justify-between rounded-lg">
                                     <div className="space-y-0.5">
-                                        <FormLabel className="text-base">Cash on Delivery</FormLabel>
+                                        <FormLabel className="text-base">Global Cash on Delivery</FormLabel>
                                         <FormDescription>
-                                            Enable or disable COD as a payment option for customers.
+                                            Enable or disable COD for all products by default.
                                         </FormDescription>
                                     </div>
                                     <FormControl>
@@ -492,6 +493,7 @@ export default function AdminPage() {
       salePrice: 0,
       images: [{ url: '' }],
       sizes: '',
+      isCashOnDeliveryAvailable: true,
       productLink: '',
       videoUrl: '',
     },
@@ -536,6 +538,7 @@ export default function AdminPage() {
                 }
             )),
             sizes: data.sizes.split(',').map(s => s.trim()),
+            isCashOnDeliveryAvailable: data.isCashOnDeliveryAvailable,
             productLink: data.productLink || '',
             videoUrl: data.videoUrl || '',
         };
@@ -710,6 +713,28 @@ export default function AdminPage() {
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={productForm.control}
+                name="isCashOnDeliveryAvailable"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>Cash on Delivery</FormLabel>
+                      <FormDescription>
+                        Is COD available for this specific product?
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={productForm.control}
                 name="videoUrl"

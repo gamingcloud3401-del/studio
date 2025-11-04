@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { OrderForm } from './order-form';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Truck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function ProductDetailsClient({ product }: { product: Product }) {
@@ -28,8 +28,11 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
     setIsDialogOpen(true);
   }
 
+  const isCodAvailable = product.isCashOnDeliveryAvailable ?? true;
+
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-2">Select Size:</h3>
         <RadioGroup
@@ -56,6 +59,13 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
         </RadioGroup>
       </div>
 
+       {!isCodAvailable && (
+         <div className="flex items-center gap-2 text-sm text-muted-foreground p-3 bg-muted/50 rounded-lg border border-dashed">
+            <Truck className="h-5 w-5 text-destructive" />
+            <span>Cash on Delivery is not available for this product.</span>
+         </div>
+       )}
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
           <Button 
@@ -78,4 +88,3 @@ export default function ProductDetailsClient({ product }: { product: Product }) 
     </div>
   );
 }
-

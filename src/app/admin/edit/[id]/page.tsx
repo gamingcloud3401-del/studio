@@ -11,13 +11,14 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import type { Product } from '@/lib/products';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowLeft, Instagram, PlusCircle, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
@@ -26,6 +27,7 @@ const productSchema = z.object({
   salePrice: z.coerce.number().min(0, 'Sale price must be a positive number'),
   images: z.array(z.object({ url: z.string().url('Please enter a valid image URL') })).min(1, 'Please add at least one image.'),
   sizes: z.string().min(1, 'Please enter at least one size (comma-separated)'),
+  isCashOnDeliveryAvailable: z.boolean(),
   productLink: z.string().url('Please enter a valid URL for the product link').optional().or(z.literal('')),
   videoUrl: z.string().url('Please enter a valid video URL').optional().or(z.literal('')),
 });
@@ -65,6 +67,7 @@ export default function EditProductPage() {
         salePrice: product.salePrice,
         images: product.images.map(img => ({ url: img.url })),
         sizes: product.sizes.join(', '),
+        isCashOnDeliveryAvailable: product.isCashOnDeliveryAvailable ?? true,
         productLink: product.productLink || '',
         videoUrl: product.videoUrl || '',
       });
@@ -101,6 +104,7 @@ export default function EditProductPage() {
                 }
             )),
             sizes: data.sizes.split(',').map(s => s.trim()),
+            isCashOnDeliveryAvailable: data.isCashOnDeliveryAvailable,
             productLink: data.productLink || '',
             videoUrl: data.videoUrl || '',
         };
@@ -318,6 +322,26 @@ export default function EditProductPage() {
                       <Input placeholder="e.g., S, M, L, XL" {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="isCashOnDeliveryAvailable"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>Cash on Delivery</FormLabel>
+                      <FormDescription>
+                        Is COD available for this specific product?
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />

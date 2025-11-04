@@ -50,7 +50,11 @@ export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormPro
 
   const { data: paymentSettings, isLoading: isLoadingPaymentSettings } = useDoc<PaymentSetting>(paymentSettingsRef);
 
-  const isCashOnDeliveryEnabled = paymentSettings?.isCashOnDeliveryEnabled ?? true; // Default to true if not set
+  // Combines global setting with product-specific setting.
+  const isGlobalCodEnabled = paymentSettings?.isCashOnDeliveryEnabled ?? true; // Default to true if not set
+  const isProductCodAvailable = product.isCashOnDeliveryAvailable ?? true;
+  const isFinalCodEnabled = isGlobalCodEnabled && isProductCodAvailable;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,7 +62,7 @@ export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormPro
       name: "",
       phone: "",
       address: "",
-      paymentMethod: isCashOnDeliveryEnabled ? undefined : "online",
+      paymentMethod: isFinalCodEnabled ? undefined : "online",
     },
   });
 
@@ -157,7 +161,7 @@ Address: ${values.address}
                             defaultValue={field.value}
                             className="flex flex-col space-y-1"
                             >
-                            {isCashOnDeliveryEnabled && (
+                            {isFinalCodEnabled && (
                                 <FormItem className="flex items-center space-x-3 space-y-0">
                                 <FormControl>
                                     <RadioGroupItem value="cash" />
