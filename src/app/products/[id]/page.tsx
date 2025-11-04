@@ -26,7 +26,7 @@ function SiteFooter() {
   return (
     <footer className="bg-card border-t mt-auto">
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-muted-foreground">
-        <p>{footerData?.content || `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.`}</p>
+        <p className="whitespace-pre-wrap">{footerData?.content || `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.`}</p>
       </div>
     </footer>
   );
@@ -208,3 +208,5 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     </div>
   );
 }
+
+    

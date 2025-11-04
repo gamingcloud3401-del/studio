@@ -407,24 +407,24 @@ function SiteSettings() {
 
 
   return (
-    <div className="max-w-2xl mx-auto space-y-12">
-        <div className="space-y-4">
+    <div className="max-w-2xl mx-auto space-y-8">
+        <div>
             <h1 className="text-3xl font-bold font-headline mb-8 flex items-center gap-3">
                 <Settings className="h-8 w-8" />
                 Site Settings
             </h1>
-
-            {/* Payment Settings */}
-            <h2 className="text-xl font-bold font-headline">Payment Settings</h2>
-            {isLoadingPayment ? <Skeleton className="h-20 w-full" /> : (
-            <Form {...paymentForm}>
-                <Card>
-                    <CardContent className="p-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Payment Settings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {isLoadingPayment ? <Skeleton className="h-20 w-full" /> : (
+                    <Form {...paymentForm}>
                         <FormField
                             control={paymentForm.control}
                             name="isCashOnDeliveryEnabled"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg">
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                                     <div className="space-y-0.5">
                                         <FormLabel className="text-base">Global Cash on Delivery</FormLabel>
                                         <FormDescription>
@@ -440,39 +440,45 @@ function SiteSettings() {
                                 </FormItem>
                             )}
                             />
-                    </CardContent>
-                </Card>
-            </Form>
-            )}
+                    </Form>
+                    )}
+                </CardContent>
+            </Card>
         </div>
         
-        <Separator/>
-
-        {/* Footer Settings */}
-        <div className="space-y-4">
-             <h2 className="text-xl font-bold font-headline">Footer Content</h2>
-            {isLoadingFooter ? <Skeleton className="h-32 w-full" /> : (
-            <Form {...footerForm}>
-                <form onSubmit={footerForm.handleSubmit(onFooterSubmit)} className="space-y-6">
-                <FormField
-                    control={footerForm.control}
-                    name="content"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Footer Text</FormLabel>
-                        <FormControl>
-                        <Textarea placeholder="Enter footer text here..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <Button type="submit" disabled={isSubmittingFooter} className="w-full">
-                    {isSubmittingFooter ? 'Saving Footer...' : 'Save Footer'}
-                </Button>
-                </form>
-            </Form>
-            )}
+        <div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Footer Content</CardTitle>
+                </CardHeader>
+                <CardContent>
+                {isLoadingFooter ? <Skeleton className="h-40 w-full" /> : (
+                <Form {...footerForm}>
+                    <form onSubmit={footerForm.handleSubmit(onFooterSubmit)} className="space-y-4">
+                    <FormField
+                        control={footerForm.control}
+                        name="content"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Footer Text</FormLabel>
+                            <FormDescription>
+                                This content will appear in your site's footer. You can use this for copyright, contact info, or other details.
+                            </FormDescription>
+                            <FormControl>
+                            <Textarea placeholder="Enter footer text here..." {...field} rows={5} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <Button type="submit" disabled={isSubmittingFooter} className="w-full">
+                        {isSubmittingFooter ? 'Saving Footer...' : 'Save Footer'}
+                    </Button>
+                    </form>
+                </Form>
+                )}
+                </CardContent>
+            </Card>
         </div>
     </div>
   )
@@ -782,3 +788,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    
