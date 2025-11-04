@@ -11,9 +11,11 @@ import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Instagram, Search, PackageSearch } from 'lucide-react';
 import type { SiteSetting } from '@/lib/settings';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
+import Autoplay from "embla-carousel-autoplay";
+
 
 function SiteFooter() {
   const firestore = useFirestore();
@@ -31,6 +33,59 @@ function SiteFooter() {
       </div>
     </footer>
   );
+}
+
+function HeroCarousel({ products, isLoading }: { products: Product[] | null, isLoading: boolean }) {
+    const plugin = useRef(
+        Autoplay({ delay: 3000, stopOnInteraction: true })
+    );
+
+    const allImages = useMemo(() => {
+        if (!products) return [];
+        return products.flatMap(p => p.images.length > 0 ? [p.images[0]] : []);
+    }, [products]);
+
+    if (isLoading) {
+        return (
+            <section className="w-full mb-12">
+                <Skeleton className="w-full aspect-[2/1] md:aspect-[3/1] object-cover" />
+            </section>
+        )
+    }
+
+    if (!allImages || allImages.length === 0) {
+        return null; // Don't show carousel if there are no images
+    }
+
+    return (
+        <section className="w-full mb-12">
+            <Carousel
+                plugins={[plugin.current]}
+                className="w-full"
+                onMouseEnter={plugin.current.stop}
+                onMouseLeave={plugin.current.reset}
+                opts={{
+                    loop: true,
+                }}
+            >
+                <CarouselContent>
+                    {allImages.map((image, index) => (
+                        <CarouselItem key={index}>
+                            <div className="w-full aspect-[2/1] md:aspect-[3/1] relative">
+                                <Image
+                                    src={image.url}
+                                    alt={image.alt}
+                                    fill
+                                    className="object-cover"
+                                    priority={index === 0}
+                                />
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+            </Carousel>
+        </section>
+    );
 }
 
 export default function Home() {
@@ -77,6 +132,9 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-grow">
+        
+        <HeroCarousel products={products} isLoading={isLoading} />
+        
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-8 text-center font-headline">
             Our Collection
