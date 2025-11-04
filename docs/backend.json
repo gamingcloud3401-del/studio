@@ -145,6 +145,25 @@
         "id",
         "content"
       ]
+    },
+    "PaymentSetting": {
+      "title": "Payment Setting",
+      "type": "object",
+      "description": "Represents payment-related settings for the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for the setting (e.g., 'paymentOptions')."
+        },
+        "isCashOnDeliveryEnabled": {
+          "type": "boolean",
+          "description": "Whether Cash on Delivery is available as a payment option."
+        }
+      },
+      "required": [
+        "id",
+        "isCashOnDeliveryEnabled"
+      ]
     }
   },
   "auth": {
@@ -215,6 +234,22 @@
             {
               "name": "settingId",
               "description": "Unique identifier for the setting (e.g., 'footer')."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/settings/{settingId}",
+        "definition": {
+          "entityName": "PaymentSetting",
+          "schema": {
+            "$ref": "#/backend/entities/PaymentSetting"
+          },
+          "description": "Stores payment-related settings. The document with ID 'paymentOptions' holds the configuration.",
+          "params": [
+            {
+              "name": "settingId",
+              "description": "Unique identifier for the setting (e.g., 'paymentOptions')."
             }
           ]
         }

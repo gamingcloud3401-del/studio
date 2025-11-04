@@ -10,7 +10,7 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, useCollection, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { collection, doc, setDoc } from 'firebase/firestore';
@@ -18,11 +18,11 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
-import type { SiteSetting } from '@/lib/settings';
+import type { PaymentSetting, SiteSetting } from '@/lib/settings';
 import { format } from 'date-fns';
 
 const productSchema = z.object({
@@ -40,8 +40,14 @@ const footerSchema = z.object({
   content: z.string().min(1, "Footer content cannot be empty."),
 });
 
+const paymentSchema = z.object({
+  isCashOnDeliveryEnabled: z.boolean(),
+});
+
+
 type ProductFormData = z.infer<typeof productSchema>;
 type FooterFormData = z.infer<typeof footerSchema>;
+type PaymentFormData = z.infer<typeof paymentSchema>;
 
 function ProductSearch() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -338,43 +344,28 @@ function OrderList() {
     )
 }
 
-function FooterEditor() {
-  const [isSubmittingFooter, setIsSubmittingFooter] = useState(false);
+function SiteSettings() {
   const { toast } = useToast();
   const firestore = useFirestore();
 
-  const footerDocRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'settings', 'footer');
-  }, [firestore]);
-
-  const { data: footerData, isLoading } = useDoc<SiteSetting>(footerDocRef);
-
-  const footerForm = useForm<FooterFormData>({
-    resolver: zodResolver(footerSchema),
-  });
-
+  // Footer Form
+  const [isSubmittingFooter, setIsSubmittingFooter] = useState(false);
+  const footerDocRef = useMemoFirebase(() => firestore ? doc(firestore, 'settings', 'footer') : null, [firestore]);
+  const { data: footerData, isLoading: isLoadingFooter } = useDoc<SiteSetting>(footerDocRef);
+  const footerForm = useForm<FooterFormData>({ resolver: zodResolver(footerSchema) });
   useEffect(() => {
     if (footerData) {
-      footerForm.reset({
-        content: footerData.content,
-      });
+      footerForm.reset({ content: footerData.content });
     } else {
-        footerForm.reset({
-            content: `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.`
-        })
+        footerForm.reset({ content: `© ${new Date().getFullYear()} Darpan Wears. All rights reserved.` })
     }
   }, [footerData, footerForm]);
 
   const onFooterSubmit: SubmitHandler<FooterFormData> = async (data) => {
-    if (!firestore) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Database not available.' });
-      return;
-    }
+    if (!firestore || !footerDocRef) return;
     setIsSubmittingFooter(true);
     try {
-      const docRef = doc(firestore, 'settings', 'footer');
-      await setDoc(docRef, data, { merge: true });
+      await setDoc(footerDocRef, data, { merge: true });
       toast({ title: 'Footer Updated!', description: 'Your website footer has been saved.' });
     } catch (error) {
       console.error('Error updating footer:', error);
@@ -384,33 +375,104 @@ function FooterEditor() {
     }
   };
 
+  // Payment Form
+  const paymentDocRef = useMemoFirebase(() => firestore ? doc(firestore, 'settings', 'paymentOptions') : null, [firestore]);
+  const { data: paymentData, isLoading: isLoadingPayment } = useDoc<PaymentSetting>(paymentDocRef);
+  const paymentForm = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentSchema),
+  });
+
+  useEffect(() => {
+    if (paymentData) {
+        paymentForm.reset({ isCashOnDeliveryEnabled: paymentData.isCashOnDeliveryEnabled });
+    } else {
+        paymentForm.reset({ isCashOnDeliveryEnabled: true });
+    }
+  }, [paymentData, paymentForm]);
+
+  const handlePaymentSettingChange = async (checked: boolean) => {
+    if (!firestore || !paymentDocRef) return;
+    paymentForm.setValue('isCashOnDeliveryEnabled', checked);
+    try {
+      await setDoc(paymentDocRef, { isCashOnDeliveryEnabled: checked }, { merge: true });
+      toast({ title: 'Payment Settings Updated', description: `Cash on Delivery has been ${checked ? 'enabled' : 'disabled'}.` });
+    } catch (error) {
+      console.error('Error updating payment settings:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update payment settings.' });
+      // Revert UI on error
+      paymentForm.setValue('isCashOnDeliveryEnabled', !checked);
+    }
+  };
+
+
   return (
-    <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold font-headline mb-8">Footer Settings</h1>
-        {isLoading ? (
-            <Skeleton className="h-32 w-full" />
-        ) : (
-        <Form {...footerForm}>
-            <form onSubmit={footerForm.handleSubmit(onFooterSubmit)} className="space-y-6">
-            <FormField
-                control={footerForm.control}
-                name="content"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Footer Content</FormLabel>
-                    <FormControl>
-                    <Textarea placeholder="Enter footer text here..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <Button type="submit" disabled={isSubmittingFooter} className="w-full">
-                {isSubmittingFooter ? 'Saving Footer...' : 'Save Footer'}
-            </Button>
-            </form>
-        </Form>
-        )}
+    <div className="max-w-2xl mx-auto space-y-12">
+        <div className="space-y-4">
+            <h1 className="text-3xl font-bold font-headline mb-8 flex items-center gap-3">
+                <Settings className="h-8 w-8" />
+                Site Settings
+            </h1>
+
+            {/* Payment Settings */}
+            <h2 className="text-xl font-bold font-headline">Payment Settings</h2>
+            {isLoadingPayment ? <Skeleton className="h-20 w-full" /> : (
+            <Form {...paymentForm}>
+                <Card>
+                    <CardContent className="p-6">
+                        <FormField
+                            control={paymentForm.control}
+                            name="isCashOnDeliveryEnabled"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base">Cash on Delivery</FormLabel>
+                                        <FormDescription>
+                                            Enable or disable COD as a payment option for customers.
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={handlePaymentSettingChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                            />
+                    </CardContent>
+                </Card>
+            </Form>
+            )}
+        </div>
+        
+        <Separator/>
+
+        {/* Footer Settings */}
+        <div className="space-y-4">
+             <h2 className="text-xl font-bold font-headline">Footer Content</h2>
+            {isLoadingFooter ? <Skeleton className="h-32 w-full" /> : (
+            <Form {...footerForm}>
+                <form onSubmit={footerForm.handleSubmit(onFooterSubmit)} className="space-y-6">
+                <FormField
+                    control={footerForm.control}
+                    name="content"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Footer Text</FormLabel>
+                        <FormControl>
+                        <Textarea placeholder="Enter footer text here..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <Button type="submit" disabled={isSubmittingFooter} className="w-full">
+                    {isSubmittingFooter ? 'Saving Footer...' : 'Save Footer'}
+                </Button>
+                </form>
+            </Form>
+            )}
+        </div>
     </div>
   )
 }
@@ -530,7 +592,7 @@ export default function AdminPage() {
 
         <Separator />
 
-        <FooterEditor />
+        <SiteSettings />
 
         <Separator />
         

@@ -18,9 +18,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { Product } from "@/lib/products";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
-import { addDocumentNonBlocking, useFirestore } from "@/firebase";
+import { addDocumentNonBlocking, useDoc, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import type { PaymentSetting } from "@/lib/settings";
+import { Skeleton } from "./ui/skeleton";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -41,12 +43,22 @@ export function OrderForm({ product, selectedSize, setDialogOpen }: OrderFormPro
   const firestore = useFirestore();
   const { toast } = useToast();
 
+  const paymentSettingsRef = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return doc(firestore, 'settings', 'paymentOptions');
+  }, [firestore]);
+
+  const { data: paymentSettings, isLoading: isLoadingPaymentSettings } = useDoc<PaymentSetting>(paymentSettingsRef);
+
+  const isCashOnDeliveryEnabled = paymentSettings?.isCashOnDeliveryEnabled ?? true; // Default to true if not set
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       phone: "",
       address: "",
+      paymentMethod: isCashOnDeliveryEnabled ? undefined : "online",
     },
   });
 
@@ -125,40 +137,53 @@ Address: ${values.address}
                 </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="paymentMethod"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Payment Method</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
+            {isLoadingPaymentSettings ? (
+                <Skeleton className="h-20 w-full" />
+            ) : (
+                 <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                        <FormItem className="space-y-3">
+                        <FormLabel>Payment Method</FormLabel>
                         <FormControl>
-                          <RadioGroupItem value="cash" />
+                            <RadioGroup
+                            onValueChange={(value) => {
+                                field.onChange(value);
+                                if (value === 'online') {
+                                    // You can add logic here if needed for online payments
+                                }
+                            }}
+                            defaultValue={field.value}
+                            className="flex flex-col space-y-1"
+                            >
+                            {isCashOnDeliveryEnabled && (
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                    <RadioGroupItem value="cash" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                    Cash on Delivery
+                                </FormLabel>
+                                </FormItem>
+                            )}
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                                <FormControl>
+                                <RadioGroupItem value="online" />
+                                </FormControl>
+                                <FormLabel className="font-normal">
+                                Online Payment
+                                </FormLabel>
+                            </FormItem>
+                            </RadioGroup>
                         </FormControl>
-                        <FormLabel className="font-normal">
-                          Cash on Delivery
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="online" />
-                        </FormControl>
-                        <FormLabel className="font-normal">
-                          Online Payment
-                        </FormLabel>
-                      </FormItem>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+            )}
+
+           
 
             <FormField
             control={form.control}
