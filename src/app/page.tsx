@@ -18,6 +18,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CustomerDetailsForm, type CustomerDetails } from '@/components/customer-details-form';
+import { cn } from '@/lib/utils';
 
 
 function SiteFooter() {
@@ -167,6 +168,7 @@ function HeroCarousel() {
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [customerDetails, setCustomerDetails] = useState<CustomerDetails | null>(null);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
@@ -192,13 +194,25 @@ export default function Home() {
     }
   }, []);
 
+  const categories = useMemo(() => {
+    if (!products) return [];
+    const allCategories = products.map(p => p.category);
+    return ['All', ...Array.from(new Set(allCategories))];
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     if (!products) return [];
-    if (!searchTerm) return products;
-    return products.filter(product =>
+    
+    let categoryFiltered = products;
+    if (selectedCategory !== 'All') {
+        categoryFiltered = products.filter(product => product.category === selectedCategory);
+    }
+
+    if (!searchTerm) return categoryFiltered;
+    return categoryFiltered.filter(product =>
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [products, searchTerm]);
+  }, [products, searchTerm, selectedCategory]);
 
 
   return (
@@ -263,6 +277,22 @@ export default function Home() {
             Our Collection
           </h2>
 
+            <div className="flex justify-center flex-wrap gap-2 mb-8">
+                {isLoading ? (
+                    Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-10 w-24" />)
+                ) : (
+                    categories.map(category => (
+                        <Button
+                            key={category}
+                            variant={selectedCategory === category ? 'default' : 'outline'}
+                            onClick={() => setSelectedCategory(category)}
+                            className={cn("capitalize", selectedCategory === category && "bg-primary text-primary-foreground")}
+                        >
+                            {category}
+                        </Button>
+                    ))
+                )}
+            </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {isLoading && Array.from({ length: 6 }).map((_, i) => (

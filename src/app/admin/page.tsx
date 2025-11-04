@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
+  category: z.string().min(3, 'Category is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   originalPrice: z.coerce.number().min(0, 'Original price must be a positive number'),
   salePrice: z.coerce.number().min(0, 'Sale price must be a positive number'),
@@ -816,6 +817,7 @@ export default function AdminPage() {
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
+      category: '',
       description: '',
       originalPrice: 0,
       salePrice: 0,
@@ -853,6 +855,7 @@ export default function AdminPage() {
         const newProduct = {
             id: productId,
             name: data.name,
+            category: data.category,
             description: data.description,
             originalPrice: data.originalPrice,
             salePrice: data.salePrice,
@@ -966,6 +969,22 @@ export default function AdminPage() {
                     <FormControl>
                       <Input placeholder="e.g., Cool T-Shirt" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={productForm.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., T-Shirts, Jackets" {...field} />
+                    </FormControl>
+                     <FormDescription>
+                        Assign a category to this product (e.g., Jackets, T-Shirts).
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

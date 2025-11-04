@@ -42,6 +42,7 @@ const originalProducts = [
   {
     id: 'prod_1',
     name: 'Denim Jacket',
+    category: 'Jackets',
     description: 'A timeless denim jacket that adds a cool, casual layer to any outfit. Made from 100% durable cotton, it features classic button-front styling, chest pockets, and a comfortable fit that gets better with every wear.',
     originalPrice: 3499,
     salePrice: 2999,
@@ -51,6 +52,7 @@ const originalProducts = [
   {
     id: 'prod_2',
     name: 'Classic White Tee',
+    category: 'T-Shirts',
     description: 'The perfect wardrobe essential. Our Classic White Tee is crafted from ultra-soft premium cotton for a breathable, comfortable feel. Its versatile design makes it ideal for layering or wearing on its own.',
     originalPrice: 1299,
     salePrice: 899,
@@ -60,6 +62,7 @@ const originalProducts = [
   {
     id: 'prod_3',
     name: 'Black Skinny Jeans',
+    category: 'Jeans',
     description: 'Elevate your style with our Black Skinny Jeans. Designed to flatter, these jeans offer a sleek, modern silhouette with just the right amount of stretch for all-day comfort. A versatile staple for any wardrobe.',
     originalPrice: 2999,
     salePrice: 2499,
@@ -69,6 +72,7 @@ const originalProducts = [
   {
     id: 'prod_4',
     name: 'Floral Summer Dress',
+    category: 'Dresses',
     description: 'Embrace the sunshine in our beautiful Floral Summer Dress. Featuring a vibrant floral print, a lightweight and breezy fabric, and a flattering A-line cut, this dress is perfect for picnics, parties, or a day out.',
     originalPrice: 2499,
     salePrice: 1999,
@@ -78,6 +82,7 @@ const originalProducts = [
   {
     id: 'prod_5',
     name: 'Leather Biker Jacket',
+    category: 'Jackets',
     description: 'Channel your inner rebel with this classic leather biker jacket. Crafted from genuine leather, it features an asymmetric zip, multiple pockets, and a tailored fit for a sharp, edgy look.',
     originalPrice: 5999,
     salePrice: 4999,

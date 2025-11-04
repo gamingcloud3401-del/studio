@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name is required'),
+  category: z.string().min(3, 'Category is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
   originalPrice: z.coerce.number().min(0, 'Original price must be a positive number'),
   salePrice: z.coerce.number().min(0, 'Sale price must be a positive number'),
@@ -72,6 +73,7 @@ export default function EditProductPage() {
     if (product) {
       form.reset({
         name: product.name,
+        category: product.category,
         description: product.description,
         originalPrice: product.originalPrice,
         salePrice: product.salePrice,
@@ -101,6 +103,7 @@ export default function EditProductPage() {
         
         const updatedProduct = {
             name: data.name,
+            category: data.category,
             description: data.description,
             originalPrice: data.originalPrice,
             salePrice: data.salePrice,
@@ -258,6 +261,22 @@ export default function EditProductPage() {
                     <FormControl>
                       <Input placeholder="e.g., Cool T-Shirt" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., T-Shirts, Jackets" {...field} />
+                    </FormControl>
+                     <FormDescription>
+                        Assign a category to this product (e.g., Jackets, T-Shirts).
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

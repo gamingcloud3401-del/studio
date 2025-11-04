@@ -44,6 +44,10 @@
           "type": "string",
           "description": "Name of the product."
         },
+        "category": {
+          "type": "string",
+          "description": "The category of the product (e.g., 'Jackets', 'T-Shirts')."
+        },
         "originalPrice": {
           "type": "number",
           "description": "The original price of the product."
@@ -70,6 +74,7 @@
       "required": [
         "id",
         "name",
+        "category",
         "originalPrice",
         "salePrice",
         "imageUrl",
