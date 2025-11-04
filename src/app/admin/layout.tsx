@@ -38,14 +38,19 @@ export default function AdminLayout({
   const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
 
   useEffect(() => {
+    // This is the single source of truth for admin authentication.
+    // It will not run on the server, only on the client.
     const authToken = sessionStorage.getItem('darpan-admin-auth');
     if (authToken === 'true') {
       setAuthStatus('authenticated');
     } else {
       setAuthStatus('unauthenticated');
-      router.push('/admin/login');
+      // If not authenticated and not already on the login page, redirect.
+      if (pathname !== '/admin/login') {
+        router.push('/admin/login');
+      }
     }
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = () => {
     sessionStorage.removeItem('darpan-admin-auth');
@@ -59,13 +64,18 @@ export default function AdminLayout({
     { href: '/admin/products', icon: Package, label: 'Products' },
     { href: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
+  
+  // If we are on the login page, we don't want to render the main layout, just the children.
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
 
   if (authStatus === 'loading') {
      return (
         <div className="flex h-screen w-screen items-center justify-center bg-background">
           <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-8 rounded-full" />
-            <Skeleton className="h-6 w-40" />
+            <p className="text-muted-foreground">Authenticating...</p>
           </div>
         </div>
       );
