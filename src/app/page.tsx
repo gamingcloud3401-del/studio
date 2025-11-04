@@ -48,7 +48,7 @@ function HeroCarousel({ products, isLoading }: { products: Product[] | null, isL
     if (isLoading) {
         return (
             <section className="w-full mb-12">
-                <Skeleton className="w-full aspect-[2/1] md:aspect-[3/1] object-cover" />
+                <Skeleton className="w-full aspect-[16/9] md:aspect-[21/9] object-cover" />
             </section>
         )
     }
@@ -71,7 +71,7 @@ function HeroCarousel({ products, isLoading }: { products: Product[] | null, isL
                 <CarouselContent>
                     {allImages.map((image, index) => (
                         <CarouselItem key={index}>
-                            <div className="w-full aspect-[2/1] md:aspect-[3/1] relative">
+                            <div className="w-full aspect-[16/9] md:aspect-[21/9] relative">
                                 <Image
                                     src={image.url}
                                     alt={image.alt}
@@ -133,8 +133,6 @@ export default function Home() {
       </header>
       <main className="flex-grow">
         
-        <HeroCarousel products={products} isLoading={isLoading} />
-        
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-8 text-center font-headline">
             Our Collection
@@ -151,6 +149,9 @@ export default function Home() {
               />
             </div>
           </div>
+          
+          <HeroCarousel products={products} isLoading={isLoading} />
+
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {isLoading && Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="group block">
