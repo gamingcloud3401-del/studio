@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CustomerDetailsForm, type CustomerDetails } from '@/components/customer-details-form';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 function SiteFooter() {
@@ -273,25 +274,27 @@ export default function Home() {
           <HeroCarousel />
           <AnnouncementBar />
           
-          <h2 id="product-grid" className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-8 text-center font-headline scroll-mt-24">
+          <h2 id="product-grid" className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-4 text-center font-headline scroll-mt-24">
             Our Collection
           </h2>
 
-            <div className="flex justify-center flex-wrap gap-2 mb-8">
-                {isLoading ? (
-                    Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-10 w-24" />)
-                ) : (
-                    categories.map(category => (
-                        <Button
-                            key={category}
-                            variant={selectedCategory === category ? 'default' : 'outline'}
-                            onClick={() => setSelectedCategory(category)}
-                            className={cn("capitalize", selectedCategory === category && "bg-primary text-primary-foreground")}
-                        >
-                            {category}
-                        </Button>
-                    ))
-                )}
+            <div className="mb-8 max-w-xs mx-auto">
+              {isLoading ? (
+                <Skeleton className="h-12 w-full" />
+              ) : (
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-full h-12 text-base">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category} value={category} className="capitalize">
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
