@@ -19,7 +19,7 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon, Shield } from 'lucide-react';
+import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon, Shield, Bot } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
@@ -793,6 +793,36 @@ function HeroImageManager() {
     );
 }
 
+function AdminAIDetails() {
+
+    return(
+        <div className="max-w-2xl mx-auto space-y-8">
+            <div>
+                <h1 className="text-3xl font-bold font-headline mb-8 flex items-center gap-3">
+                    <Bot className="h-8 w-8" />
+                    Darpan 2.0 AI Assistant
+                </h1>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>AI Configuration</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            <p className="text-muted-foreground">
+                                The AI assistant (Darpan 2.0) automatically learns from your product list. To provide it with more business-specific information (like shipping policies, return information, etc.), you can edit its core prompt.
+                            </p>
+                            <p className='text-sm text-muted-foreground'>
+                                The AI prompt can be found and edited in the file: <code className='bg-muted px-2 py-1 rounded-md'>src/ai/flows/darpan-flow.ts</code>
+                            </p>
+                            <Button disabled>Edit AI Prompt (Coming Soon)</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    )
+}
+
 
 export default function AdminPage() {
   const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
@@ -953,6 +983,10 @@ export default function AdminPage() {
         <Separator />
 
         <HeroImageManager />
+
+        <Separator />
+
+        <AdminAIDetails />
 
         <Separator />
         
