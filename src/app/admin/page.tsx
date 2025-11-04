@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -55,6 +56,7 @@ const paymentSchema = z.object({
 
 const heroImageSchema = z.object({
   title: z.string().min(3, 'Title is required.'),
+  subtitle: z.string().optional(),
   imageUrl: z.string().url('Please enter a valid image URL.'),
 });
 
@@ -640,6 +642,7 @@ function HeroImageManager() {
         resolver: zodResolver(heroImageSchema),
         defaultValues: {
             title: '',
+            subtitle: '',
             imageUrl: '',
         },
     });
@@ -652,6 +655,7 @@ function HeroImageManager() {
             const newHeroImage = {
                 id: newDocRef.id,
                 title: data.title,
+                subtitle: data.subtitle || '',
                 imageUrl: data.imageUrl,
             };
             await addDocumentNonBlocking(newDocRef, newHeroImage);
@@ -702,9 +706,23 @@ function HeroImageManager() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Title</FormLabel>
-                                            <FormDescription>Text to display over the image.</FormDescription>
+                                            <FormDescription>Main text to display over the image.</FormDescription>
                                             <FormControl>
-                                                <Input placeholder="e.g., Summer Collection is Here!" {...field} />
+                                                <Input placeholder="e.g., Summer Collection!" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="subtitle"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Subtitle (Optional)</FormLabel>
+                                            <FormDescription>Smaller text below the main title.</FormDescription>
+                                            <FormControl>
+                                                <Input placeholder="e.g., Up to 50% off" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -743,6 +761,7 @@ function HeroImageManager() {
                                         <Image src={image.imageUrl} alt={image.title} width={80} height={80} className="rounded-md object-cover aspect-square" />
                                         <div>
                                             <p className="font-semibold">{image.title}</p>
+                                            {image.subtitle && <p className="text-sm text-muted-foreground">{image.subtitle}</p>}
                                             <p className="text-xs text-muted-foreground truncate max-w-xs">{image.imageUrl}</p>
                                         </div>
                                     </div>

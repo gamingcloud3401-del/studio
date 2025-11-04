@@ -18,6 +18,10 @@
         "title": {
           "type": "string",
           "description": "The main title text to display over the image."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "The subtitle text to display below the main title."
         }
       },
       "required": [
