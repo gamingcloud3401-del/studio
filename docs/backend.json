@@ -156,11 +156,11 @@
     "SiteSetting": {
       "title": "Site Setting",
       "type": "object",
-      "description": "Represents a global application setting, like footer text.",
+      "description": "Represents a global application setting, like footer text or privacy policy.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "The unique identifier for the setting (e.g., 'footer')."
+          "description": "The unique identifier for the setting (e.g., 'footer', 'privacyPolicy')."
         },
         "content": {
           "type": "string",
@@ -290,11 +290,11 @@
           "schema": {
             "$ref": "#/backend/entities/SiteSetting"
           },
-          "description": "Stores global site settings. For example, the document with ID 'footer' holds the custom footer text.",
+          "description": "Stores global site settings. For example, the document with ID 'footer' holds the custom footer text, and 'privacyPolicy' holds the privacy policy content.",
           "params": [
             {
               "name": "settingId",
-              "description": "Unique identifier for the setting (e.g., 'footer', 'announcement')."
+              "description": "Unique identifier for the setting (e.g., 'footer', 'announcement', 'privacyPolicy')."
             }
           ]
         }

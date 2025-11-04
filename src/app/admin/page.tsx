@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -19,7 +18,7 @@ import type { Product } from '@/lib/products';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon } from 'lucide-react';
+import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, Clock, Settings, LogOut, Megaphone, Image as ImageIcon, Shield } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
@@ -42,6 +41,10 @@ const footerSchema = z.object({
   content: z.string().min(1, "Footer content cannot be empty."),
 });
 
+const privacyPolicySchema = z.object({
+    content: z.string().min(1, "Privacy Policy content cannot be empty."),
+});
+
 const announcementSchema = z.object({
   content: z.string().optional(),
 });
@@ -58,6 +61,7 @@ const heroImageSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 type FooterFormData = z.infer<typeof footerSchema>;
+type PrivacyPolicyFormData = z.infer<typeof privacyPolicySchema>;
 type AnnouncementFormData = z.infer<typeof announcementSchema>;
 type PaymentFormData = z.infer<typeof paymentSchema>;
 type HeroImageFormData = z.infer<typeof heroImageSchema>;
@@ -414,6 +418,34 @@ function SiteSettings() {
     }
   };
 
+  // Privacy Policy Form
+  const [isSubmittingPrivacy, setIsSubmittingPrivacy] = useState(false);
+  const privacyDocRef = useMemoFirebase(() => firestore ? doc(firestore, 'settings', 'privacyPolicy') : null, [firestore]);
+  const { data: privacyData, isLoading: isLoadingPrivacy } = useDoc<SiteSetting>(privacyDocRef);
+  const privacyForm = useForm<PrivacyPolicyFormData>({ resolver: zodResolver(privacyPolicySchema) });
+  useEffect(() => {
+    if (privacyData) {
+        privacyForm.reset({ content: privacyData.content });
+    } else {
+        privacyForm.reset({ content: `Welcome to Darpan Wears. We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website.` });
+    }
+  }, [privacyData, privacyForm]);
+  
+  const onPrivacySubmit: SubmitHandler<PrivacyPolicyFormData> = async (data) => {
+    if (!firestore || !privacyDocRef) return;
+    setIsSubmittingPrivacy(true);
+    try {
+      await setDoc(privacyDocRef, data, { merge: true });
+      toast({ title: 'Privacy Policy Updated!', description: 'Your privacy policy has been saved.' });
+    } catch (error) {
+      console.error('Error updating privacy policy:', error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update privacy policy.' });
+    } finally {
+      setIsSubmittingPrivacy(false);
+    }
+  };
+
+
   // Payment Form
   const paymentDocRef = useMemoFirebase(() => firestore ? doc(firestore, 'settings', 'paymentOptions') : null, [firestore]);
   const { data: paymentData, isLoading: isLoadingPayment } = useDoc<PaymentSetting>(paymentDocRef);
@@ -546,6 +578,41 @@ function SiteSettings() {
                     />
                     <Button type="submit" disabled={isSubmittingFooter} className="w-full">
                         {isSubmittingFooter ? 'Saving Footer...' : 'Save Footer'}
+                    </Button>
+                    </form>
+                </Form>
+                )}
+                </CardContent>
+            </Card>
+        </div>
+
+        <div>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" /> Privacy Policy</CardTitle>
+                </CardHeader>
+                <CardContent>
+                {isLoadingPrivacy ? <Skeleton className="h-40 w-full" /> : (
+                <Form {...privacyForm}>
+                    <form onSubmit={privacyForm.handleSubmit(onPrivacySubmit)} className="space-y-4">
+                    <FormField
+                        control={privacyForm.control}
+                        name="content"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Policy Content</FormLabel>
+                            <FormDescription>
+                                This content will be displayed on your Privacy Policy page.
+                            </FormDescription>
+                            <FormControl>
+                            <Textarea placeholder="Enter your privacy policy text here..." {...field} rows={10} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <Button type="submit" disabled={isSubmittingPrivacy} className="w-full">
+                        {isSubmittingPrivacy ? 'Saving Policy...' : 'Save Privacy Policy'}
                     </Button>
                     </form>
                 </Form>
