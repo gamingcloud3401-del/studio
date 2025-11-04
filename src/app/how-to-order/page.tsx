@@ -14,7 +14,7 @@ const steps = [
         title_hi: "१. ब्राउज़ करें और चुनें",
         description: "Explore our collection and click on any product you like to see more details.",
         description_hi: "हमारे संग्रह का अन्वेषण करें और अपनी पसंद के किसी भी उत्पाद पर अधिक विवरण देखने के लिए क्लिक करें।",
-        image: "https://i.postimg.cc/kG8xzz7P/step1.gif"
+        image: "https://i.postimg.cc/mD4nBbhv/step1.gif"
     },
     {
         icon: <Info className="h-8 w-8 text-primary" />,
@@ -22,7 +22,7 @@ const steps = [
         title_hi: "२. विवरण और आकार जांचें",
         description: "Review the product details, select your desired size, and click 'Order Now'.",
         description_hi: "उत्पाद विवरण की समीक्षा करें, अपना वांछित आकार चुनें, और 'अभी ऑर्डर करें' पर क्लिक करें।",
-        image: "https://i.postimg.cc/tJnB9TjJ/step2.gif"
+        image: "https://i.postimg.cc/d1G5M2tM/step2.gif"
     },
     {
         icon: <Send className="h-8 w-8 text-primary" />,
@@ -30,7 +30,7 @@ const steps = [
         title_hi: "३. व्हाट्सएप पर भेजें",
         description: "Fill in your details in the form and click 'Send Order on WhatsApp' to place your order directly with us.",
         description_hi: "फॉर्म में अपना विवरण भरें और सीधे हमारे साथ अपना ऑर्डर देने के लिए 'व्हाट्सएप पर ऑर्डर भेजें' पर क्लिक करें।",
-        image: "https://i.postimg.cc/J4V0gQ9c/step3.gif"
+        image: "https://i.postimg.cc/FR1bM4jF/step3.gif"
     },
 ];
 
