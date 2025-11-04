@@ -85,37 +85,26 @@ function HeroCarousel() {
         document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth' });
     }
 
-    const renderContent = (image?: HeroImage) => (
-        <div className="w-full aspect-square relative">
-            {image && (
-                <Image
-                    src={image.imageUrl}
-                    alt="Hero background"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-            )}
-            <div className="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none">
-                <div className="text-center text-white p-4 flex flex-col items-center">
-                    <h2 
-                        className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold" 
-                        style={{ textShadow: '2px 4px 10px rgba(0,0,0,0.8)' }}
-                    >
-                        Welcome to Darpan Wears
-                    </h2>
-                    <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
-                        <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" onClick={scrollToProducts}>
-                            <ShoppingCart className="mr-3" />
-                            Shop Now
-                        </Button>
-                        <Button size="lg" variant="outline" className="bg-transparent hover:bg-white/10 text-white border-white border-2 text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" asChild>
-                            <Link href="/how-to-order">
-                                <HelpCircle className="mr-3" />
-                                How to Order
-                            </Link>
-                        </Button>
-                    </div>
+    const staticContent = (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10 pointer-events-none">
+            <div className="text-center text-white p-4 flex flex-col items-center">
+                <h2 
+                    className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold" 
+                    style={{ textShadow: '2px 4px 10px rgba(0,0,0,0.8)' }}
+                >
+                    Welcome to Darpan Wears
+                </h2>
+                <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
+                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" onClick={scrollToProducts}>
+                        <ShoppingCart className="mr-3" />
+                        Shop Now
+                    </Button>
+                    <Button size="lg" variant="outline" className="bg-transparent hover:bg-white/10 text-white border-white border-2 text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" asChild>
+                        <Link href="/how-to-order">
+                            <HelpCircle className="mr-3" />
+                            How to Order
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -129,16 +118,9 @@ function HeroCarousel() {
         )
     }
 
-    if (!heroImages || heroImages.length === 0) {
-        return (
-             <section className="w-full mb-12 border rounded-lg overflow-hidden shadow-lg relative bg-muted">
-                {renderContent()}
-            </section>
-        );
-    }
-
     return (
         <section className="w-full mb-12 border rounded-lg overflow-hidden shadow-lg relative">
+            {staticContent}
             <Carousel
                 plugins={[plugin.current]}
                 className="w-full"
@@ -149,11 +131,25 @@ function HeroCarousel() {
                 }}
             >
                 <CarouselContent>
-                    {heroImages.map((image, index) => (
-                        <CarouselItem key={index}>
-                           {renderContent(image)}
+                    {(!heroImages || heroImages.length === 0) ? (
+                        <CarouselItem>
+                             <div className="w-full aspect-square relative bg-muted" />
                         </CarouselItem>
-                    ))}
+                    ) : (
+                        heroImages.map((image, index) => (
+                            <CarouselItem key={index}>
+                                <div className="w-full aspect-square relative">
+                                    <Image
+                                        src={image.imageUrl}
+                                        alt="Hero background"
+                                        fill
+                                        className="object-cover"
+                                        priority={index === 0}
+                                    />
+                                </div>
+                            </CarouselItem>
+                        ))
+                    )}
                 </CarouselContent>
             </Carousel>
         </section>
@@ -219,7 +215,7 @@ export default function Home() {
                 <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
                 <span>Darpan Wears</span>
                 </Link>
-                <Image src="https://postimg.cc/wTjXzYpT" alt="Indian Flag" width={40} height={27} className="hidden sm:block" />
+                <Image src="https://i.postimg.cc/wTjXzYpT/indian-flag-waving.gif" alt="Indian Flag" width={40} height={27} className="hidden sm:block" />
                 <Link
                     href="https://www.instagram.com/darpan_wears?igsh=a2pkYXhpajVwNnR3"
                     target="_blank"
@@ -363,5 +359,7 @@ export default function Home() {
     </div>
   );
 }
+
+    
 
     
