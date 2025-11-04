@@ -1,11 +1,8 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { HelpCircle } from 'lucide-react';
-
 
 function AdminGuide() {
     return (
@@ -75,32 +72,7 @@ function AdminGuide() {
     )
 }
 
-
 export default function AdminPage() {
-  const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  
-  useEffect(() => {
-    // Check for auth token in sessionStorage
-    const authToken = sessionStorage.getItem('darpan-admin-auth');
-    if (authToken === 'true') {
-      setIsAuthenticated(true);
-    } else {
-      router.push('/admin/login');
-    }
-  }, [router]);
-
-  if (!isAuthenticated) {
-    return (
-        <div className="flex h-screen w-screen items-center justify-center bg-background">
-            <div className="flex flex-col items-center space-y-4">
-                <p className="text-muted-foreground">Redirecting to login...</p>
-            </div>
-        </div>
-    );
-  }
-
-
   return (
     <div className="bg-background min-h-screen">
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">

@@ -41,17 +41,6 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const [authStatus, setAuthStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading');
-
-  useEffect(() => {
-    const authToken = sessionStorage.getItem('darpan-admin-auth');
-    if (authToken === 'true') {
-      setAuthStatus('authenticated');
-    } else {
-      setAuthStatus('unauthenticated');
-      router.push('/admin/login');
-    }
-  }, [router]);
   
   const firestore = useFirestore();
   const productRef = useMemoFirebase(() => {
@@ -142,33 +131,9 @@ export default function EditProductPage() {
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('darpan-admin-auth');
-    setAuthStatus('unauthenticated');
-    router.push('/admin/login');
-  };
-
-  if (authStatus !== 'authenticated') {
-    return (
-        <div className="flex h-screen w-screen items-center justify-center bg-background">
-             <p className="text-muted-foreground">Loading...</p>
-        </div>
-    );
-  }
-
   if (isProductLoading) {
     return (
         <div className="bg-background min-h-screen">
-             <header className="bg-card border-b sticky top-0 z-40">
-                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
-                    <Link href="/" className="flex items-center gap-2 text-3xl font-bold text-primary font-headline">
-                        <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
-                        <span>Darpan Wears - Admin</span>
-                    </Link>
-                </div>
-                </div>
-            </header>
             <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="max-w-2xl mx-auto">
                     <Skeleton className="h-8 w-40 mb-8" />
@@ -195,16 +160,15 @@ export default function EditProductPage() {
                 <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
                 <p className="text-muted-foreground mb-6">The product you're trying to edit doesn't exist.</p>
                 <Button asChild>
-                    <Link href="/admin">
+                    <Link href="/admin/products">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to Admin
+                        Back to Products
                     </Link>
                 </Button>
             </div>
         </div>
      )
   }
-
 
   return (
     <div className="bg-background min-h-screen">
