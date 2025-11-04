@@ -9,10 +9,11 @@ import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase
 import type { Product } from '@/lib/products';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Instagram, Search } from 'lucide-react';
+import { Instagram, Search, PackageSearch } from 'lucide-react';
 import type { SiteSetting } from '@/lib/settings';
 import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 function SiteFooter() {
   const firestore = useFirestore();
@@ -55,7 +56,7 @@ export default function Home() {
     <div className="bg-background min-h-screen flex flex-col">
       <header className="bg-card border-b sticky top-0 z-40">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center sm:justify-start h-20">
+          <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
                 <Link href="/" className="flex items-center gap-2 text-3xl font-bold text-primary font-headline">
                 <Image src="https://i.postimg.cc/bvypQBy5/IMG-20251031-224943-060.webp" alt="Darpan Wears Logo" width={48} height={48} className="rounded-full" />
@@ -72,6 +73,12 @@ export default function Home() {
                     <span className="sr-only">Instagram</span>
                 </Link>
             </div>
+             <Button asChild variant="outline">
+                <Link href="/track">
+                    <PackageSearch className="mr-2 h-4 w-4" />
+                    Track Order
+                </Link>
+            </Button>
           </div>
         </div>
       </header>
