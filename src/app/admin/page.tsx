@@ -22,7 +22,7 @@ import { Pencil, Trash2, Search, PlusCircle, Instagram, Calendar, CheckCircle, C
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import type { Order } from '@/lib/orders';
-import type { PaymentSetting, SiteSetting, AnnouncementSetting, HeroImage } from '@/lib/settings';
+import type { PaymentSetting, SiteSetting, AnnouncementSetting, HeroImage, AIPromptSetting } from '@/lib/settings';
 import { format } from 'date-fns';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -59,6 +59,10 @@ const heroImageSchema = z.object({
   imageUrl: z.string().url('Please enter a valid image URL.'),
 });
 
+const aiPromptSchema = z.object({
+    basePrompt: z.string().min(20, 'The AI prompt must be at least 20 characters.'),
+});
+
 
 type ProductFormData = z.infer<typeof productSchema>;
 type FooterFormData = z.infer<typeof footerSchema>;
@@ -66,6 +70,8 @@ type PrivacyPolicyFormData = z.infer<typeof privacyPolicySchema>;
 type AnnouncementFormData = z.infer<typeof announcementSchema>;
 type PaymentFormData = z.infer<typeof paymentSchema>;
 type HeroImageFormData = z.infer<typeof heroImageSchema>;
+type AIPromptFormData = z.infer<typeof aiPromptSchema>;
+
 
 function AdminGuide() {
     return (
@@ -77,42 +83,77 @@ function AdminGuide() {
                 </h1>
                 <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="item-1">
-                        <AccordionTrigger>Managing Orders</AccordionTrigger>
+                        <AccordionTrigger>
+                            <div>
+                                <p>Managing Orders</p>
+                                <p className='text-primary font-normal'>ऑर्डर प्रबंधित करना</p>
+                            </div>
+                        </AccordionTrigger>
                         <AccordionContent className='space-y-2'>
                             <p>This section shows all incoming orders from customers. You can see customer details, the product they ordered, and the date.</p>
+                            <p className='text-sm text-muted-foreground'>यह अनुभाग ग्राहकों से आने वाले सभी ऑर्डर दिखाता है। आप ग्राहक विवरण, उनके द्वारा ऑर्डर किया गया उत्पाद और तारीख देख सकते हैं।</p>
                             <p>Use the toggle switch to mark an order as 'Completed'. This will help you keep track of your fulfillment process. Use the trash icon to delete an order entirely.</p>
+                            <p className='text-sm text-muted-foreground'>किसी ऑर्डर को 'पूर्ण' के रूप में चिह्नित करने के लिए टॉगल स्विच का उपयोग करें। यह आपको अपनी पूर्ति प्रक्रिया पर नज़र रखने में मदद करेगा। किसी ऑर्डर को पूरी तरह से हटाने के लिए ट्रैश आइकन का उपयोग करें।</p>
                             <p>You can also search for specific orders using the search bar.</p>
+                            <p className='text-sm text-muted-foreground'>आप खोज बार का उपयोग करके विशिष्ट ऑर्डर भी खोज सकते हैं।</p>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2">
-                        <AccordionTrigger>Site Settings</AccordionTrigger>
+                         <AccordionTrigger>
+                            <div>
+                                <p>Site Settings</p>
+                                <p className='text-primary font-normal'>साइट सेटिंग्स</p>
+                            </div>
+                        </AccordionTrigger>
                         <AccordionContent className='space-y-2'>
                              <p>Here you can control global settings for your website:</p>
-                            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                                <li><strong>Payment Settings:</strong> Globally enable or disable Cash on Delivery.</li>
-                                <li><strong>Announcement Bar:</strong> Set a promotional message that appears on your homepage. Leave it blank to hide the bar.</li>
-                                <li><strong>Footer Content:</strong> Change the text that appears at the bottom of every page.</li>
-                                <li><strong>Privacy Policy:</strong> Edit the content of your privacy policy page.</li>
+                             <p className='text-sm text-muted-foreground'>यहां आप अपनी वेबसाइट के लिए वैश्विक सेटिंग्स को नियंत्रित कर सकते हैं:</p>
+                            <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                                <li><strong>Payment Settings (भुगतान सेटिंग्स):</strong> Globally enable or disable Cash on Delivery (विश्व स्तर पर कैश ऑन डिलीवरी सक्षम या अक्षम करें).</li>
+                                <li><strong>Announcement Bar (घोषणा बार):</strong> Set a promotional message that appears on your homepage. Leave it blank to hide the bar (एक प्रचार संदेश सेट करें जो आपके होमपेज पर दिखाई दे। बार छिपाने के लिए इसे खाली छोड़ दें).</li>
+                                <li><strong>Footer Content (फुटर सामग्री):</strong> Change the text that appears at the bottom of every page (हर पृष्ठ के नीचे दिखाई देने वाले टेक्स्ट को बदलें).</li>
+                                <li><strong>Privacy Policy (गोपनीयता नीति):</strong> Edit the content of your privacy policy page (अपने गोपनीयता नीति पृष्ठ की सामग्री संपादित करें).</li>
                             </ul>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-3">
-                        <AccordionTrigger>Manage Hero Section</AccordionTrigger>
-                        <AccordionContent>
-                            <p>This section allows you to manage the big image carousel on your homepage. You can add new images by providing a URL. You can also see a list of current images and delete any you no longer want.</p>
+                         <AccordionTrigger>
+                            <div>
+                                <p>Manage Hero Section</p>
+                                <p className='text-primary font-normal'>हीरो अनुभाग प्रबंधित करें</p>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className='space-y-2'>
+                            <p>This section allows you to manage the big image carousel on your homepage. You can add new images by providing a URL.</p>
+                            <p className='text-sm text-muted-foreground'>यह अनुभाग आपको अपने होमपेज पर बड़े छवि हिंडोला को प्रबंधित करने की अनुमति देता है। आप एक URL प्रदान करके नई छवियां जोड़ सकते हैं।</p>
+                            <p>You can also see a list of current images and delete any you no longer want.</p>
+                             <p className='text-sm text-muted-foreground'>आप वर्तमान छवियों की एक सूची भी देख सकते हैं और किसी भी को हटा सकते हैं जिसे आप अब नहीं चाहते हैं।</p>
                         </AccordionContent>
                     </AccordionItem>
                      <AccordionItem value="item-4">
-                        <AccordionTrigger>Darpan 2.0 AI Assistant</AccordionTrigger>
-                        <AccordionContent>
-                           <p>The AI assistant automatically learns from your product list. To provide it with more business-specific information (like shipping policies, return information, etc.), you can edit its core prompt in the file: <code className='bg-muted px-2 py-1 rounded-md'>src/ai/flows/darpan-flow.ts</code>.</p>
+                         <AccordionTrigger>
+                            <div>
+                                <p>Darpan 2.0 AI Assistant</p>
+                                <p className='text-primary font-normal'>दर्पण 2.0 एआई सहायक</p>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className='space-y-2'>
+                           <p>The AI assistant automatically learns from your product list. To provide it with more business-specific information (like shipping policies, return information, etc.), you can edit its core prompt here.</p>
+                           <p className='text-sm text-muted-foreground'>एआई सहायक स्वचालित रूप से आपकी उत्पाद सूची से सीखता है। इसे और अधिक व्यवसाय-विशिष्ट जानकारी (जैसे शिपिंग नीतियां, वापसी की जानकारी, आदि) प्रदान करने के लिए, आप यहां इसके मूल प्रॉम्प्ट को संपादित कर सकते हैं।</p>
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-5">
-                        <AccordionTrigger>Adding & Editing Products</AccordionTrigger>
+                         <AccordionTrigger>
+                            <div>
+                                <p>Adding & Editing Products</p>
+                                <p className='text-primary font-normal'>उत्पाद जोड़ना और संपादित करना</p>
+                            </div>
+                        </AccordionTrigger>
                         <AccordionContent className='space-y-2'>
                              <p>Use the "Add New Product" form to add items to your store. Fill in all the details, including name, price, description, sizes, and at least one image URL.</p>
+                             <p className='text-sm text-muted-foreground'>अपने स्टोर में आइटम जोड़ने के लिए "नया उत्पाद जोड़ें" फ़ॉर्म का उपयोग करें। नाम, मूल्य, विवरण, आकार और कम से कम एक छवि URL सहित सभी विवरण भरें।</p>
                              <p>The "Manage Products" section below shows all your current products. You can click "Edit" to go to a separate page to update a product's details, or "Delete" to remove it permanently.</p>
+                              <p className='text-sm text-muted-foreground'>नीचे "उत्पाद प्रबंधित करें" अनुभाग आपके सभी वर्तमान उत्पादों को दिखाता है। आप किसी उत्पाद के विवरण को अपडेट करने के लिए एक अलग पृष्ठ पर जाने के लिए "संपादित करें" पर क्लिक कर सकते हैं, या इसे स्थायी रूप से हटाने के लिए "हटाएं" पर क्लिक कर सकते हैं।</p>
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
@@ -812,6 +853,60 @@ function HeroImageManager() {
 }
 
 function AdminAIDetails() {
+    const { toast } = useToast();
+    const firestore = useFirestore();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const aiPromptDocRef = useMemoFirebase(() => firestore ? doc(firestore, 'settings', 'darpanAssistant') : null, [firestore]);
+    const { data: aiPromptData, isLoading } = useDoc<AIPromptSetting>(aiPromptDocRef);
+
+    const form = useForm<AIPromptFormData>({
+        resolver: zodResolver(aiPromptSchema),
+    });
+
+    useEffect(() => {
+        if (aiPromptData) {
+            form.reset({ basePrompt: aiPromptData.basePrompt });
+        } else {
+            form.reset({
+                basePrompt: `You are Darpan 2.0, a friendly and helpful AI shopping assistant for an e-commerce store called Darpan Wears.
+
+Your goal is to answer user questions about products, ordering, shipping, or anything related to the store. Be concise and encouraging.
+
+If the user provides an image, your primary task is to identify the product in the image by comparing it to the product catalog. State which product you think it is and why. If it's a screenshot from social media, acknowledge that and still try to find the matching product.
+
+If no image is provided, answer the user's text-based question.
+
+How to order:
+1. Browse products and select one.
+2. Check details, select a size, and click 'Order Now'.
+3. Fill in your details and click 'Send Order on WhatsApp'.
+All orders are placed via WhatsApp. Cash on Delivery is available for most products.`
+            });
+        }
+    }, [aiPromptData, form]);
+
+    const onSubmit: SubmitHandler<AIPromptFormData> = async (data) => {
+        if (!aiPromptDocRef) return;
+        setIsSubmitting(true);
+        try {
+            await setDoc(aiPromptDocRef, data, { merge: true });
+            toast({
+                title: 'AI Prompt Updated!',
+                description: "Darpan 2.0's instructions have been saved.",
+            });
+        } catch (error) {
+            console.error('Error updating AI prompt:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Could not update the AI prompt.',
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     return(
         <div className="max-w-2xl mx-auto space-y-8">
@@ -825,15 +920,37 @@ function AdminAIDetails() {
                         <CardTitle>AI Configuration</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="space-y-4">
-                            <p className="text-muted-foreground">
-                                The AI assistant (Darpan 2.0) automatically learns from your product list. To provide it with more business-specific information (like shipping policies, return information, etc.), you can edit its core prompt.
-                            </p>
-                            <p className='text-sm text-muted-foreground'>
-                                The AI prompt can be found and edited in the file: <code className='bg-muted px-2 py-1 rounded-md'>src/ai/flows/darpan-flow.ts</code>
-                            </p>
-                            <Button disabled>Edit AI Prompt (Coming Soon)</Button>
-                        </div>
+                        {isLoading ? (
+                            <Skeleton className="h-48 w-full" />
+                        ) : (
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="basePrompt"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>AI System Prompt</FormLabel>
+                                                <FormDescription>
+                                                    These are the core instructions for the AI. Edit this to change its personality, add details about shipping/returns, or provide other store information.
+                                                </FormDescription>
+                                                <FormControl>
+                                                    <Textarea
+                                                        placeholder="You are a helpful AI assistant..."
+                                                        rows={15}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button type="submit" disabled={isSubmitting} className="w-full">
+                                        {isSubmitting ? 'Saving Prompt...' : 'Save AI Prompt'}
+                                    </Button>
+                                </form>
+                            </Form>
+                        )}
                     </CardContent>
                 </Card>
             </div>
@@ -1211,3 +1328,5 @@ export default function AdminPage() {
     </div>
   );
 }
+
+    

@@ -209,6 +209,22 @@
         "id",
         "content"
       ]
+    },
+    "AIPromptSetting": {
+      "title": "AI Prompt Setting",
+      "type": "object",
+      "description": "Stores the configuration for the AI assistant's system prompt.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier, which will be 'darpanAssistant'."
+        },
+        "basePrompt": {
+          "type": "string",
+          "description": "The core instructions for the AI, defining its personality, goals, and store-specific knowledge like shipping policies."
+        }
+      },
+      "required": [ "id", "basePrompt" ]
     }
   },
   "auth": {
@@ -330,8 +346,27 @@
             }
           ]
         }
+      },
+      {
+        "path": "/settings/{settingId}",
+        "definition": {
+          "entityName": "AIPromptSetting",
+          "schema": {
+            "$ref": "#/backend/entities/AIPromptSetting"
+          },
+          "description": "Stores the AI assistant's prompt. The document with ID 'darpanAssistant' holds the configuration.",
+          "params": [
+            {
+              "name": "settingId",
+              "description": "Unique identifier for the setting (e.g., 'darpanAssistant')."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "Given the application's requirements for managing a product catalog and capturing customer order information, the following Firestore structure is recommended. The structure is designed to be simple and secure, aligning with the principles of Authorization Independence, Clarity of Intent, and No Custom Claims. This ensures that security rules are straightforward and maintainable, and that `list` operations are secure.\n\nThe structure leverages path-based ownership for customer data. This ensures that data related to a specific customer is stored under their own user ID, making it easy to implement security rules based on user authentication. The structure also uses standard naming conventions.\n\nThe application primarily requires storing product information and order details. The `products` collection stores the product information.  Customer information is captured in a dedicated collection only at the point of order, and linked to orders via the `customerId` field within the order document.\n\nThis design provides the required data segregation: Customer and product data are separated, and the path-based ownership isolates the customer data, thereby adhering to data segregation strategy."
   }
 }
+
+
+    
