@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -9,7 +8,7 @@ import { useCollection, useDoc, useFirestore, useMemoFirebase } from '@/firebase
 import type { Product } from '@/lib/products';
 import { collection, doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Instagram, Search, PackageSearch, Megaphone } from 'lucide-react';
+import { Instagram, Search, PackageSearch, Megaphone, ShoppingCart, HelpCircle, Shield } from 'lucide-react';
 import type { SiteSetting, AnnouncementSetting, HeroImage } from '@/lib/settings';
 import { useState, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
@@ -65,7 +64,7 @@ function AnnouncementBar() {
 
 function HeroCarousel() {
     const plugin = useRef(
-        Autoplay({ delay: 3000, stopOnInteraction: true })
+        Autoplay({ delay: 4000, stopOnInteraction: true })
     );
 
     const firestore = useFirestore();
@@ -76,10 +75,55 @@ function HeroCarousel() {
 
     const { data: heroImages, isLoading } = useCollection<HeroImage>(heroImagesCollection);
 
+    const scrollToProducts = () => {
+        document.getElementById('product-grid')?.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    const renderContent = (image?: HeroImage) => (
+        <div className="w-full aspect-square relative">
+            {image && (
+                <Image
+                    src={image.imageUrl}
+                    alt={image.title}
+                    fill
+                    className="object-cover"
+                    priority
+                />
+            )}
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center pointer-events-none">
+                <div className="text-center text-white p-4 flex flex-col items-center">
+                    <h2 
+                        className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold" 
+                        style={{ textShadow: '2px 4px 10px rgba(0,0,0,0.8)' }}
+                    >
+                        {image ? image.title : "Welcome to Darpan Wears"}
+                    </h2>
+                    <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
+                        <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" onClick={scrollToProducts}>
+                            <ShoppingCart className="mr-3" />
+                            Shop Now
+                        </Button>
+                        <Button size="lg" variant="outline" className="bg-transparent hover:bg-white/10 text-white border-white border-2 text-lg px-8 py-6 rounded-full shadow-lg transform transition-transform hover:scale-105" asChild>
+                            <Link href="/how-to-order">
+                                <HelpCircle className="mr-3" />
+                                How to Order
+                            </Link>
+                        </Button>
+                         <Button size="lg" variant="link" className="text-white/80 hover:text-white text-md" asChild>
+                            <Link href="/privacy-policy">
+                                Privacy Policy
+                            </Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     if (isLoading) {
         return (
             <section className="w-full mb-12">
-                <Skeleton className="w-full aspect-square object-cover" />
+                <Skeleton className="w-full aspect-square" />
             </section>
         )
     }
@@ -87,13 +131,7 @@ function HeroCarousel() {
     if (!heroImages || heroImages.length === 0) {
         return (
              <section className="w-full mb-12 border rounded-lg overflow-hidden shadow-lg relative bg-muted">
-                <div className="w-full aspect-square flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-                        <h2 className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold text-white text-center p-4" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
-                            Welcome to Darpan Wears
-                        </h2>
-                    </div>
-                </div>
+                {renderContent()}
             </section>
         );
     }
@@ -112,20 +150,7 @@ function HeroCarousel() {
                 <CarouselContent>
                     {heroImages.map((image, index) => (
                         <CarouselItem key={index}>
-                            <div className="w-full aspect-square relative">
-                                <Image
-                                    src={image.imageUrl}
-                                    alt={image.title}
-                                    fill
-                                    className="object-cover"
-                                    priority={index === 0}
-                                />
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-                                    <h2 className="text-5xl sm:text-6xl md:text-7xl font-headline font-bold text-white text-center p-4" style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7)' }}>
-                                        {image.title}
-                                    </h2>
-                                </div>
-                            </div>
+                           {renderContent(image)}
                         </CarouselItem>
                     ))}
                 </CarouselContent>
@@ -182,9 +207,7 @@ export default function Home() {
       <main className="flex-grow">
         
         <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-8 text-center font-headline">
-            Our Collection
-          </h2>
+          
           <div className="mb-12 max-w-md mx-auto">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -198,8 +221,13 @@ export default function Home() {
             </div>
           </div>
           
-          <AnnouncementBar />
           <HeroCarousel />
+          <AnnouncementBar />
+          
+          <h2 id="product-grid" className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl mb-8 text-center font-headline scroll-mt-24">
+            Our Collection
+          </h2>
+
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
             {isLoading && Array.from({ length: 6 }).map((_, i) => (
